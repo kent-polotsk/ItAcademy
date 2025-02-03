@@ -1,10 +1,74 @@
-﻿namespace EFDatabase
+﻿using EFDatabase.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace EFDatabase
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            using (var db = new GNAggregatorContext())
+            {
+                /*  var users = new List<User>()
+                  {
+                    new User
+                      {
+                      Id = new Guid(),
+                      Name = "User1",
+                      Email = "123@11.com",
+                      Password = "111",
+                      CreatedDate = DateTime.Now,
+                      IsAdmin = true,
+                      IsBanned = false,
+                      },
+
+                      new User
+                      {
+                          Id = new Guid(),
+                          Name = "User1",
+                          Email = "123@11.com",
+                          Password = "111",
+                          CreatedDate = DateTime.Now,
+                          IsAdmin = true,
+                          IsBanned = false,
+                      },
+
+                      new User
+                      {
+                          Id = new Guid(),
+                          Name = "User1",
+                          Email = "123@11.com",
+                          Password = "111",
+                          CreatedDate = DateTime.Now,
+                          IsAdmin = true,
+                          IsBanned = false,
+                      }
+                  };*/
+
+                var us = db.Users.ToList();
+                us[1].Name = "User2222";
+                us[1].Email = "22@22.net";
+                us[1].Password = "222";
+                us[1].IsBanned = false;
+                us[1].IsAdmin = false;
+
+                us[2].Name = "User Vasily";
+                us[2].Email = "Vasily@Ivanov.ru";
+                us[2].Password = "33";
+                us[2].IsBanned = false;
+                us[2].IsAdmin = false;
+
+                //await db.Users.AddRangeAsync(users);
+                await db.SaveChangesAsync();
+
+                var u2 = await db.Users.FirstOrDefaultAsync(x => x.Name == "User2222");
+                db.Users.Remove(u2);
+                await db.SaveChangesAsync();
+
+                var us3 = db.Users.ToList();
+                foreach (var u in us3) 
+                { Console.WriteLine($"ID:{u.Id}, name:{u.Name}, @:{u.Email}, pas:{u.Password}, CrDate:{u.CreatedDate}, Adm:{u.IsAdmin}, Ban:{u.IsBanned}"); }
+            }
         }
     }
 }
