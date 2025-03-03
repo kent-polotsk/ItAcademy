@@ -1,0 +1,58 @@
+﻿@model ArticleCollectionModel
+
+@{
+    ViewBag.Title = "Articles";
+    Layout = "_Layout";
+}
+
+<h2>Articles</h2>
+<div>
+    <h5>
+        Элементов на странице:
+        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="3" class="@(Model.PageInfo.PageSize == 3 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 3 ? " style1" : "" )">3</a>
+        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="5" class="@(Model.PageInfo.PageSize == 5 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 5 ? "style1" : "")">5</a>
+        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="10" class="@(Model.PageInfo.PageSize == 10 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 10 ? "style1" : "")">10</a>
+        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="15" class="@(Model.PageInfo.PageSize == 15 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 15 ? "style1" : "")">15</a>
+    </h5>
+</div>
+
+<div>
+    <a asp-action="AddArticle">AddArticle</a>
+</div>
+
+
+<div>
+    @Model.PageInfo.PageNumber
+    <br/>
+    @Model.PageInfo.PageSize
+
+</div>
+<hr />
+<div>
+    @ViewBag.PageSize = pageSize
+    <br/>
+    @ViewBag.Page = page
+</div>
+
+@foreach (var article in Model.Articles)
+{
+    <div>
+        <div>
+            <h3>@article.Title</h3>
+            <h5>@article.CreationDate</h5>
+        </div>
+        <div>
+            <p>
+                @article.Description
+            </p>
+            <a asp-action="Details" asp-route-id="@article.Id">Read details</a>
+        </div>
+        <div>
+            <h4>@article.Source</h4>
+            <span>Rate: @article.Rate</span>
+        </div>
+    </div>
+    <hr />
+}
+
+<pagination page-action="index" page-info="Model.PageInfo"></pagination>

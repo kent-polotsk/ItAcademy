@@ -45,18 +45,18 @@ namespace EFDatabase
                       }
                   };*/
 
-                var us = db.Users.ToList();
-                us[1].Name = "User2222";
-                us[1].Email = "22@22.net";
-                us[1].Password = "222";
-                us[1].IsBanned = false;
-                us[1].IsAdmin = false;
+                //var us = db.Users.ToList();
+                //us[0].Name = "User2222";
+                //us[0].Email = "22@22.net";
+                //us[0].Password = "222";
+                //us[0].IsBanned = false;
+                //us[0].IsAdmin = false;
 
-                us[2].Name = "User Vasily";
-                us[2].Email = "Vasily@Ivanov.ru";
-                us[2].Password = "33";
-                us[2].IsBanned = false;
-                us[2].IsAdmin = false;
+                //us[1].Name = "User Vasily";
+                //us[1].Email = "Vasily@Ivanov.ru";
+                //us[1].Password = "33";
+                //us[1].IsBanned = false;
+                //us[1].IsAdmin = false;
 
                 //await db.Users.AddRangeAsync(users);
                 await db.SaveChangesAsync();

@@ -1,0 +1,13 @@
+﻿@model GNA.Core.BookModel
+
+<div>
+    <h2>@Model.Title</h2>
+    <h4>@Model.Author</h4>
+
+    <div>
+        @Model.Description
+    </div>
+    <a asp-action="Details" asp-controller="Book" asp-route-id="@Model.Id">Read details</a>
+    <hr />
+    <br />
+</div>

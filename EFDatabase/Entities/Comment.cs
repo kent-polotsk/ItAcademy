@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EFDatabase.Entities
 {
-    internal class Comment
+    public class Comment
     {
         public Guid Id { get; set; }
         public string Content { get; set; }

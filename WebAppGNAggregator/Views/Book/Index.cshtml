@@ -1,0 +1,8 @@
+﻿@using GNA.Core
+@model BookModel[]
+
+@foreach (var book in Model)
+{
+    @await Html.PartialAsync("BookPreview", book)
+}
+
