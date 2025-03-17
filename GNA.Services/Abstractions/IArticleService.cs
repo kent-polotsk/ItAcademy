@@ -11,7 +11,7 @@ namespace GNA.Services.Abstractions
     {
         public Task AddArticleAsync(Article article);
         Task<int> CountAsync(double minRate);
-        public Task<Article[]> GetAllPositiveAsync(double minPositivityRate);
+        public Task<Article[]> GetAllPositiveAsync(double minPositivityRate, int pageNumber, int pageSize);
 
         public Task<Article> GetByIdAsync(Guid id);
     }

@@ -3,6 +3,8 @@ using GNA.Services.Abstractions;
 using GNA.Services.Implementations;
 using GNA.Services.Samples;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using System.Configuration;
 namespace WebAppGNAggregator
 {
     public class Program
@@ -11,9 +13,13 @@ namespace WebAppGNAggregator
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration)
+                .CreateLogger();
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddSerilog();
             builder.Services.AddDbContext<GNAggregatorContext>(opt =>
             opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 

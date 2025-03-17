@@ -1,0 +1,27 @@
+﻿@model AddArticleModel
+
+@{
+    ViewBag.Title = "Добавить новость";
+    Layout = "_Layout";
+}
+
+<h2>Add Article</h2>
+
+<form asp-action="AddArticleProcessing" asp-controller="Home" method="post">
+    <div>
+        <label asp-for="Title">Title</label>
+        <input asp-for="Title" type="text" />
+        <span asp-validation-for="Title"></span>
+    </div>
+    <div>
+        <label asp-for="Description">Description</label>
+        <textarea asp-for="Description"></textarea>
+        <span asp-validation-for="Description"></span>
+    </div>
+    <div>
+        <label asp-for="Rate">Rate</label>
+        <input asp-for="Rate" type="number" />
+        <span asp-validation-for="Rate"></span>
+    </div>
+    <input type="submit" text="Submit" />
+</form>

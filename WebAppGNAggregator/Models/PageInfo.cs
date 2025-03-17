@@ -1,7 +1,10 @@
-﻿namespace WebAppGNAggregator.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebAppGNAggregator.Models
 {
     public class PageInfo
     {
+        
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
         public int TotalItems { get; set; }

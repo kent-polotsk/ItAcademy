@@ -1,13 +1,13 @@
-﻿@model AddArticleModel
+﻿@model ArticleModel
 
 @{
-    ViewBag.Title = "Add Article";
+    ViewBag.Title = "EditArticle";
     Layout = "_Layout";
 }
 
-<h2>Add Article</h2>
+<h2>Edit Article</h2>
 
-<form asp-action="AddArticleProcessing" asp-controller="Articles" method="post">
+<form asp-action="AddArticleProcessing" asp-controller="Home" method="post">
     <div>
         <label asp-for="Title">Title</label>
         <input asp-for="Title" type="text" required />
@@ -20,5 +20,5 @@
         <label asp-for="Rate">Rate</label>
         <input asp-for="Rate" type="number" />
     </div>
-    <input type="submit" text="Submit" />
+    <input type="submit" text="Submit"/>
 </form>

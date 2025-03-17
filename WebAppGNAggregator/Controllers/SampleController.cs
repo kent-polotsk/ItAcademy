@@ -44,6 +44,27 @@ namespace WebAppGNAggregator.Controllers
             return View();
 
         }
+        [HttpPost]
+        public IActionResult LoginProcess(LoginModel model)
+        {
+            return View();
+
+        }
+
+        [HttpGet]
+        public IActionResult Registration()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Registration(RegistrationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            return RedirectToAction("Index", "Home");
+        }
 
         public IActionResult Hello(string name)
         {
@@ -65,16 +86,20 @@ namespace WebAppGNAggregator.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpPost]
-        public IActionResult LoginProcess(LoginModel model)
-        {
-            return Ok(model);
-        }
-
         public IActionResult THS()
         {
 
             return View();
+        }
+
+        [AcceptVerbs("Get", "Post")]
+        public IActionResult CheckEmail(string email)
+        {
+            if (email == "my@mail.com")
+            {
+                return Json(false);
+            }
+            return Json(true);
         }
     }
 }

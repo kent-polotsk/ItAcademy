@@ -7,7 +7,7 @@ using WebAppGNAggregator.Models;
 
 namespace WebAppGNAggregator.TagHelpers
 {
-    /*
+    
     public class PaginationTagHelper : TagHelper
     {
         private readonly IUrlHelperFactory _urlHelperFactory;
@@ -36,7 +36,7 @@ namespace WebAppGNAggregator.TagHelpers
                 var anchorInnerHtml = i.ToString();
                 itemTag.AddCssClass("btn btn-outline-primary");
 
-                if (ViewContext.HttpContext.Request.Query.ContainsKey("page") && int.TryParse(ViewContext.HttpContext.Request.Query["page"], out var actualPage))
+                if (ViewContext.HttpContext.Request.Query.ContainsKey("pageNumber") && int.TryParse(ViewContext.HttpContext.Request.Query["pageNumber"], out var actualPage))
                 {
                     if (i == actualPage)
                     {
@@ -55,7 +55,7 @@ namespace WebAppGNAggregator.TagHelpers
                         itemTag.AddCssClass("active");
                     }
                 }
-                itemTag.Attributes["href"] = urlHelper.Action(PageAction, new { page = i });
+                itemTag.Attributes["href"] = urlHelper.Action(PageAction, new { pageNumber = i, pageSize = PageInfo.PageSize });
                 itemTag.InnerHtml.AppendHtml(anchorInnerHtml);
                 result.InnerHtml.AppendHtml(itemTag);
             }
@@ -66,8 +66,8 @@ namespace WebAppGNAggregator.TagHelpers
         }
     }
    
-    */
     
+    /*
     public class PaginationTagHelper : TagHelper
     {
         private readonly IUrlHelperFactory _urlHelperFactory;
@@ -135,5 +135,5 @@ namespace WebAppGNAggregator.TagHelpers
             output.Content.AppendHtml(result.InnerHtml);
         }
     }
-    
+    */
 }
