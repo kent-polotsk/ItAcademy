@@ -1,0 +1,13 @@
+﻿@{
+    ViewBag.Title = "Агрегация новостей";
+    Layout = "_Layout";
+}
+
+<h2>Aggregate</h2>
+
+<form asp-action="AggregateProcessing" asp-controller="Articles" method="post">
+   <div class="alert alert-warning" role="alert">
+       Сбор новостей займет некоторое время...
+   </div>
+    <input class="btn btn-primary" type="submit" value="Агрегировать" />
+</form>

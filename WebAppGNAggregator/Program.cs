@@ -1,10 +1,12 @@
+using DAL_CQS_.Commands;
 using EFDatabase;
 using GNA.Services.Abstractions;
 using GNA.Services.Implementations;
-using GNA.Services.Samples;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Configuration;
+using WebAppGNAggregator.Mappers;
 namespace WebAppGNAggregator
 {
     public class Program
@@ -16,6 +18,8 @@ namespace WebAppGNAggregator
             Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration)
                 .CreateLogger();
 
+            //builder.Environment.EnvironmentName = "Production";
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -23,28 +27,24 @@ namespace WebAppGNAggregator
             builder.Services.AddDbContext<GNAggregatorContext>(opt =>
             opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-            builder.Services.AddScoped<IAuthorsService, AuthorsService>();
-            builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<IArticleService, ArticleService>();
+            builder.Services.AddScoped<ISourceService, SourceService>();
+            builder.Services.AddScoped<IRssService, RssService>();
+            builder.Services.AddMediatR(sc => sc.RegisterServicesFromAssembly(typeof(AddArticlesCommand).Assembly));
+            builder.Services.AddTransient<ArticleMapper>();
 
-            builder.Services.AddTransient<ITransientService, TransietnService>();
-            builder.Services.AddScoped<IScopedService, ScopedService>();
-            builder.Services.AddSingleton<ISingletonService, SingletonService>();
-            
-            builder.Services.AddScoped<ITestService, TestService>();
-
-            
-
-         
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
+            //if (!app.Environment.IsDevelopment())
+            //{
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-            }
+            //}
+
+            app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
+
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

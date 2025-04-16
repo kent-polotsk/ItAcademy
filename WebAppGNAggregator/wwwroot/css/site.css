@@ -18,7 +18,7 @@ html {
 }
 
 body {
-    padding-top:80px;
+    padding-top: 80px;
     margin-bottom: 60px;
     background-image: url("/images/background.jpg");
     background-size: cover;
@@ -45,18 +45,32 @@ body {
 
 .card {
     background-color: #fce3cc;
-    padding: 20px;
+    padding: 10px;
     font-size: 20px;
     font-weight: bold;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     color: #333;
+    margin-top: 10px;
+}
+
+.cardGeneral {
+    background-color: #faeedd;
+    padding: 10px;
+    /*font-size: 20px;
+    font-weight: bold;
+    */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /*color: #333;*/
+    margin-top: 20px;
 }
 
 .btn400 {
     background-color: #5a67d8;
     border-color: #5a67d8;
     color: #fff;
+    margin: 5px;
 }
 
     .btn400:hover {
@@ -66,9 +80,18 @@ body {
     }
 
 header {
-    border: 5px solid #fce3cc; /* Бежевый цвет для окантовки */
-    border-radius: 10px; /* Скругление углов */
-    margin: 2px 5px 5px 5px; /* Отступ от краёв экрана */
-    background-color: #fff; /* Белый фон */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень для объема */
+    border: 5px solid #fce3cc;
+    border-radius: 10px;
+    margin: 2px 5px 5px 5px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.text-error {
+    display: block;
+    height: 22px;
+    color: red;
+    margin: 0;
+    font-size: 18px;
+}
+

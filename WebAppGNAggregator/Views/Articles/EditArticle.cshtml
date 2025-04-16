@@ -1,0 +1,54 @@
+﻿@model ArticleModel
+
+@{
+    ViewBag.Title = "Редактирование новости";
+    Layout = "_Layout";
+}
+
+<form class="card p-4" asp-action="EditArticle" asp-controller="Articles" method="post">
+
+    <h2 class="text-center mb-4">Редактирование новости</h2>
+
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <span asp-validation-for="Title" class="text-error"></span>
+
+    <div class="form-group mb-3">
+        <label asp-for="Title" class="form-label">Заголовок</label>
+        <input asp-for="Title" type="text" class="form-control" placeholder="Заголовок" required />
+    </div>
+    
+    <div class="form-group mb-3">
+        <label asp-for="Description" class="form-label">Описание</label>
+        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Описание" required></textarea>
+    </div>
+    
+
+    <span asp-validation-for="Content" class="text-error"></span>
+    <div class="form-group mb-3">
+        <label asp-for="Content" class="form-label">Текст</label>
+        <textarea asp-for="Content" class="form-control" rows="5" placeholder="Текст новости" required></textarea>
+    </div>
+    
+
+    <span asp-validation-for="ImgUrl" class="text-error"></span>
+    <div class="form-group mb-3">
+        <label asp-for="ImgUrl" class="form-label">Url изображения</label>
+        <textarea asp-for="ImgUrl" class="form-control" rows="3" placeholder="URL изображения" ></textarea>
+    </div>
+    
+    <span asp-validation-for="Rate" class="text-error"></span>
+
+    <div class="d-flex align-items-center mb-3">
+        <label asp-for="Rate" class="form-label  me-3" style="white-space: nowrap">Рейтинг позитивности   </label>
+        <input asp-for="Rate" type="number" class="form-control" placeholder="5" />
+        
+    </div>
+    
+    <div class="btn-group">
+        <button type="submit" class="btn btn400">Сохранить</button>
+        <a class="btn btn400" asp-action="Details" asp-controller="Articles">Отмена</a>
+    </div>
+</form>
+

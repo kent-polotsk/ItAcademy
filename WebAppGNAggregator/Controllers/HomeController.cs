@@ -1,47 +1,50 @@
-using EFDatabase.Entities;
+using EFDatabase;
 using GNA.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using WebAppGNAggregator.Filters;
+using WebAppGNAggregator.Mappers;
 using WebAppGNAggregator.Models;
 
 namespace WebAppGNAggregator.Controllers
 {
     public class HomeController : Controller
     {
-
-
         private readonly ILogger<HomeController> _logger;
 
         private readonly IArticleService _articleService;
+        private readonly ISourceService _sourceService;
+        private readonly IRssService _rssService;
+        private readonly ArticleMapper _articleMapper;
+
         private const int _sourceId = 1;
 
-        public HomeController(ILogger<HomeController> logger,IArticleService articleService)
+        private readonly GNAggregatorContext _dbContext;
+
+        public HomeController(ILogger<HomeController> logger, IArticleService articleService, GNAggregatorContext dbContext, ISourceService sourceService, IRssService rssService, ArticleMapper articleMapper)
         {
             _logger = logger;
             _articleService = articleService;
+            _dbContext = dbContext;
+            _sourceService = sourceService;
+            _rssService = rssService;
+            _articleMapper = articleMapper;
         }
 
-        [MyActionFilter]
+
         [HttpGet]
         public async Task<IActionResult> Index(PaginationModel paginationModel)
         {
             try
             {
                 const double minPosRate = 0;
-                var articles = (await _articleService.GetAllPositiveAsync(minPosRate, paginationModel.PageNumber, paginationModel.PageSize))
-                    .Select(article => new ArticleModel()
-                    {
-                        Id = article.Id,
-                        Title = article.Title,
-                        Description = article.Description,
-                        Source = article.Source.Name,
-                        CreationDate = article.Created,
-                        Rate = article.PositivityRate ?? 0
-                    })
+                var articleDtos = (await _articleService.GetAllPositiveAsync(minPosRate, paginationModel.PageNumber, paginationModel.PageSize))
+                    .Select(a => _articleMapper.ArticleToArticleDto(a))
                     .ToArray();
+
                 _logger.LogInformation("Articles are selected");
+
                 var totalArticlesCount = await _articleService.CountAsync(minPosRate);
+
+                _logger.LogInformation("Articles counted");
                 var pageInfo = new PageInfo()
                 {
                     PageNumber = paginationModel.PageNumber,
@@ -49,12 +52,15 @@ namespace WebAppGNAggregator.Controllers
                     TotalItems = totalArticlesCount
                 };
 
+                _logger.LogInformation("PageInfo created");
+                pageInfo.DeviceType = HttpContext.Request.Headers["User-Agent"].ToString().Contains("Mobi") ? 1 : 5;
+
                 ViewBag.PageSize = paginationModel.PageSize;
                 ViewBag.Page = paginationModel.PageNumber;
                 _logger.LogInformation("(Home)Index.Ok");
-                return View(new ArticleCollectionModel
+                return View(new ArticleDtoCollectionModel
                 {
-                    Articles = articles,
+                    ArticleDtos = articleDtos,
                     PageInfo = pageInfo
                 });
             }
@@ -65,115 +71,24 @@ namespace WebAppGNAggregator.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Details([FromRoute] Guid id)
-        {
-            var article = await _articleService.GetByIdAsync(id);
-            if (article != null)
-            {
-                var model = new ArticleModel
-                {
-                    Id = article.Id,
-                    Title = article.Title,
-                    Description = article.Description,
-                    Source = article.Source.Name,
-                    CreationDate = article.Created,
-                    Rate = article.PositivityRate ?? 0
-                };
-
-                return View(model);
-            }
-            return NotFound();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Details2([FromRoute] Guid id)
-        {
-            var article = await _articleService.GetByIdAsync(id);
-            if (article != null)
-            {
-                var model = new ArticleModel
-                {
-                    Id = article.Id,
-                    Title = article.Title,
-                    Description = article.Description,
-                    Source = article.Source.Name,
-                    CreationDate = article.Created,
-                    Rate = article.PositivityRate ?? 0
-                };
-
-                return View(model);
-            }
-            return NotFound();
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> AddArticle([FromForm] AddArticleModel? model)
-        {
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddArticleProcessing(AddArticleModel model)
-        {
-            if (!ModelState.IsValid)
-                return View("AddArticle", model);
-
-            var article = new Article
-            {
-                Id = Guid.NewGuid(),
-                Title = model.Title,
-                Description = model.Description,
-                PositivityRate = model.Rate,
-                Content = "",
-                Url = "",
-                Created = DateTime.Now,
-                SourceId = _sourceId
-            };
-            _articleService.AddArticleAsync(article);
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> EditArticle(Guid id)
-        {
-            var article = await _articleService.GetByIdAsync(id);
-            if (article != null)
-            {
-                var model = new ArticleModel()
-                {
-                    Id = article.Id,
-                    Title = article.Title,
-                    Description = article.Description,
-                    Source = article.Source.Name,
-                    CreationDate = article.Created,
-                    Rate = article.PositivityRate ?? 0
-                };
-                return View(model);
-            }
-            else { return NotFound(); }
-        }
-        [HttpPost]
-        public async Task<IActionResult> EditArticle(ArticleModel model)
-        {
-            var data = model;
-            return Ok();
-        }
-        public IActionResult Index()
-        {
-            return View();
-        }
 
         public IActionResult Privacy()
         {
             return View();
         }
 
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int? statusCode = null, string? errorMessage = null)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var errorViewModel = new ErrorViewModel
+            {
+                StatusCode = statusCode ?? 404,
+                ErrorMessage = errorMessage ?? "ѕохоже такой страницы не существует :("
+            };
+
+            return View(errorViewModel);
         }
+
     }
 }

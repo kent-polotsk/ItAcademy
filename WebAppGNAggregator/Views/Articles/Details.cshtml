@@ -1,0 +1,59 @@
+﻿@using DataConvert.DTO
+@model ArticleDto
+
+@{
+    ViewBag.Title = Model.Title;
+    Layout = "_Layout";
+}
+
+<div class="card">
+    <h2>@Model.Title</h2>
+    <hr>
+    <p>
+        <span>Создано @Model.Created</span>
+    </p>
+    
+        @if (Model.Updated != null)
+        {
+            <p>
+            <span>Изменено @Model.Updated</span>
+            </p>
+        }
+    
+    <p>
+        <h6>Рейтинг позитивности: @Model.PositivityRate</h6>
+    </p>
+
+    <div>
+
+        <div>
+            <p>
+                @Model.Content
+            </p>
+        </div>
+    </div>
+
+
+    <div class="btn-group">
+        <form asp-action="EditArticle" asp-controller="Articles" method="get">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <button type="submit" class="btn btn400">Редактировать</button>
+        </form>
+
+        <form asp-action="Delete" asp-controller="Articles" method="post">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <button type="button" class="btn btn400" onclick="confirmDelete()">Удалить</button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        const userConfirmed = confirm("Вы уверены, что хотите удалить эту запись?");
+        if (userConfirmed) {
+            const form = event.target.closest('form');
+            form.submit();
+        }
+    }
+</script>

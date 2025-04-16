@@ -1,0 +1,21 @@
+﻿@using EFDatabase.Entities
+@model Source[]
+
+@{
+    ViewBag.Title = "Sources";
+    Layout = "_Layout";
+}
+
+
+@foreach (var item in Model)
+{
+    <div class="card mx-auto d-flex justify-content-center">
+        <p>
+            <h2># @item.Id</h2>
+            <h3>@item.Name</h3>
+            <h4><a href="@item.URL" target="_blank" >@item.URL</a></h4>
+        </p>
+        <hr>
+        
+    </div>
+}

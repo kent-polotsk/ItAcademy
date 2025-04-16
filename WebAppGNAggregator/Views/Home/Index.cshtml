@@ -1,4 +1,4 @@
-﻿@model ArticleCollectionModel
+﻿@model ArticleDtoCollectionModel
 
 @{
     ViewBag.Title = "Агрегатор хороших новостей";
@@ -19,31 +19,36 @@
 </div>
 
 <div>
-    <a class="btn  btn400" asp-action="AddArticle">AddArticle</a>
+    <a class="btn  btn400" asp-action="Aggregate" asp-controller="Articles">Aggregate</a>
+    <a class="btn  btn400" asp-action="Index" asp-controller="Sources">Sources</a>
 </div>
 
-@foreach (var article in Model.Articles)
+@foreach (var article in Model.ArticleDtos)
 {
-    <div>
+    <div class="cardGeneral">
         <div>
             <div class="card">@article.Title</div>
-            <h5>@article.CreationDate</h5>
+            <br>
+            <h5>@article.Created</h5>
         </div>
         <div>
             <p>
-                @article.Description
-            </p>
-            <a asp-action="Details" asp-route-id="@article.Id">Read details</a>
+                @Html.Raw(article.Description)
+            </p>          
+            <a asp-action="Details" asp-controller="Articles" asp-route-id="@article.Id">Подробнее</a>
         </div>
         <div>
-            <h4>@article.Source</h4>
-            <span>Rate: @article.Rate</span>
+            <h4>@article.SourceName</h4>
+            <span>Rate: @article.PositivityRate</span>
         </div>
     </div>
-    <hr />
-}
 
+}
+<br>
+<div class="d-flex justify-content-center">
 <pagination page-action="index" page-info="Model.PageInfo"></pagination>
+</div>
+
 
 <script>
     function updateTime() 
