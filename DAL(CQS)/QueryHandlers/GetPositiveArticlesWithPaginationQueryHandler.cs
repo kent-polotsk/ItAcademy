@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DAL_CQS_.QueryHandlers
 {
-    public class GetPositiveArticlesWithPaginationQueryHandler : IRequestHandler<GetPositiveArticlesWithPaginationQuery, Article[]>
+    public class GetPositiveArticlesWithPaginationQueryHandler : IRequestHandler<GetPositiveArticlesWithPaginationQuery, Article?[]>
     {
 
         public readonly GNAggregatorContext _dbContext;
@@ -21,10 +21,10 @@ namespace DAL_CQS_.QueryHandlers
             _dbContext = dbContext;
         }
 
-        public async Task<Article[]> Handle(GetPositiveArticlesWithPaginationQuery request, CancellationToken cancellationToken)
+        public async Task<Article?[]> Handle(GetPositiveArticlesWithPaginationQuery request, CancellationToken cancellationToken)
         {
             var result = await _dbContext.Articles
-                    .Where(article => article.PositivityRate >= request.PositivityRate || article.PositivityRate == null)
+                    .Where(article => article.PositivityRate == null || article.PositivityRate >= request.PositivityRate)
                     .Include(article => article.Source)
                     .AsNoTracking()
                     .OrderByDescending(article => article.Created)

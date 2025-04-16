@@ -1,4 +1,4 @@
-﻿@model ArticleDtoCollectionModel
+﻿@model ArticleModelsCollection
 
 @{
     ViewBag.Title = "Агрегатор хороших новостей";
@@ -23,7 +23,7 @@
     <a class="btn  btn400" asp-action="Index" asp-controller="Sources">Sources</a>
 </div>
 
-@foreach (var article in Model.ArticleDtos)
+@foreach (var article in Model.ArticleModels)
 {
     <div class="cardGeneral">
         <div>

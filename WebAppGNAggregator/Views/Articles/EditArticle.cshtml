@@ -21,7 +21,7 @@
     
     <div class="form-group mb-3">
         <label asp-for="Description" class="form-label">Описание</label>
-        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Описание" required></textarea>
+        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Описание"></textarea>
     </div>
     
 
@@ -32,23 +32,23 @@
     </div>
     
 
-    <span asp-validation-for="ImgUrl" class="text-error"></span>
+    <span asp-validation-for="ImageUrl" class="text-error"></span>
     <div class="form-group mb-3">
-        <label asp-for="ImgUrl" class="form-label">Url изображения</label>
-        <textarea asp-for="ImgUrl" class="form-control" rows="3" placeholder="URL изображения" ></textarea>
+        <label asp-for="ImageUrl" class="form-label">Url изображения</label>
+        <textarea asp-for="ImageUrl" class="form-control" rows="3" placeholder="URL изображения"></textarea>
     </div>
     
-    <span asp-validation-for="Rate" class="text-error"></span>
+    <span asp-validation-for="PositivityRate" class="text-error"></span>
 
     <div class="d-flex align-items-center mb-3">
-        <label asp-for="Rate" class="form-label  me-3" style="white-space: nowrap">Рейтинг позитивности   </label>
-        <input asp-for="Rate" type="number" class="form-control" placeholder="5" />
+        <label asp-for="PositivityRate" class="form-label  me-3" style="white-space: nowrap">Рейтинг позитивности   </label>
+        <input asp-for="PositivityRate" type="number" class="form-control" placeholder="5" />
         
     </div>
     
     <div class="btn-group">
         <button type="submit" class="btn btn400">Сохранить</button>
-        <a class="btn btn400" asp-action="Details" asp-controller="Articles">Отмена</a>
+        <a class="btn btn400" asp-action="Details" asp-controller="Articles" asp-route-id="@Model.Id">Отмена</a>
     </div>
 </form>
 

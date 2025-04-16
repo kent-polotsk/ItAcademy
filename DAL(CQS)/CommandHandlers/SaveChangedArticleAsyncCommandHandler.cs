@@ -30,7 +30,7 @@ namespace DAL_CQS_.CommandHandlers
             if (article1 != null) 
             {
                 article1.Title = request.articleModel.Title;
-                article1.PositivityRate = request.articleModel.Rate;
+                article1.PositivityRate = request.articleModel.PositivityRate;
                 article1.Updated= DateTime.Now;
                 article1.Description = request.articleModel.Description;
                 article1.Content = request.articleModel.Content;

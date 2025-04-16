@@ -71,6 +71,7 @@ body {
     border-color: #5a67d8;
     color: #fff;
     margin: 5px;
+    gap: 15px;
 }
 
     .btn400:hover {

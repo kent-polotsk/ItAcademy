@@ -16,6 +16,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using WebAppGNAggregator.Mappers;
 using WebAppGNAggregator.Models;
 
 namespace GNA.Services.Implementations
@@ -25,25 +26,33 @@ namespace GNA.Services.Implementations
         private readonly GNAggregatorContext _dbContext;
         private readonly ILogger<ArticleService> _logger;
         private readonly IMediator _mediator;
+        private readonly ArticleMapper _articleMapper;
 
-        public ArticleService(GNAggregatorContext dbContext, ILogger<ArticleService> logger, IMediator mediator)
+        public ArticleService(GNAggregatorContext dbContext, ILogger<ArticleService> logger, IMediator mediator, ArticleMapper articleMapper)
         {
             _dbContext = dbContext;
             _logger = logger;
             _mediator = mediator;
+            _articleMapper = articleMapper;
         }
 
 
-        public async Task<Article[]> GetAllPositiveAsync(double? minPositivityRate, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        public async Task<ArticleDto?[]> GetAllPositiveAsync(double? minPositivityRate, int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
             try
             {
-                return await _mediator.Send(new GetPositiveArticlesWithPaginationQuery()
+                var articleDtos = (await _mediator.Send(new GetPositiveArticlesWithPaginationQuery()
                 {
                     PositivityRate = minPositivityRate,
                     Page = pageNumber,
                     PageSize = pageSize
-                }, cancellationToken);
+                }, cancellationToken))
+                    .Select(article => _articleMapper.ArticleToArticleDto(article))
+                    .ToArray();
+
+                _logger.LogInformation("Articles are selected and converted to ArticleDtos");
+                return articleDtos;
+
             }
             catch (Exception ex)
             {
@@ -51,6 +60,11 @@ namespace GNA.Services.Implementations
                 throw;
             }
         }
+
+
+
+
+
 
         public async Task<ArticleDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
@@ -90,10 +104,10 @@ namespace GNA.Services.Implementations
         {
             var ids = await _mediator.Send(new GetIdsForArticlesWithNoTextQuery(), cancellationToken);
             var dictionary = new Dictionary<Guid, string>();
-            
+
             foreach (var id in ids)
             {
-                var article = await _mediator.Send(new GetArticleByIdQuery { Id = id}, cancellationToken);
+                var article = await _mediator.Send(new GetArticleByIdQuery { Id = id }, cancellationToken);
 
                 if (article == null || string.IsNullOrWhiteSpace(article.Url))
                 {
@@ -122,7 +136,7 @@ namespace GNA.Services.Implementations
                     {
                         articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='js-mediator-article']");
                     }
-                    else 
+                    else
                     {
                         articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='article__text']");
                     }
@@ -134,7 +148,7 @@ namespace GNA.Services.Implementations
                         continue;
                     }
                     string innerText = articleNode.InnerText;
-                    string readyText = Regex.Replace(innerText,@"\s+", " ").Trim();
+                    string readyText = Regex.Replace(innerText, @"\s+", " ").Trim();
                     dictionary.Add(id, readyText);
 
                 }
@@ -151,8 +165,8 @@ namespace GNA.Services.Implementations
         }
 
         public Task SaveChangedArticleAsync(ArticleModel model, CancellationToken cancellationToken = default)
-        {  
-            return _mediator.Send(new SaveChangedArticleAsyncCommand() {articleModel = model}, cancellationToken);
+        {
+            return _mediator.Send(new SaveChangedArticleAsyncCommand() { articleModel = model }, cancellationToken);
         }
 
         public async Task<object?> GetAllPositiveAsync(int minRate, int pageNumber, int pageSize)

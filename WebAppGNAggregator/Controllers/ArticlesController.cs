@@ -87,7 +87,7 @@ namespace WebAppGNAggregator.Controllers
                     
 
                     _logger.LogInformation($"Article {articleModel.Id} retrieved successfully.");
-                    return View(articleDto);
+                    return View(articleModel);
                 }
                 else
                 {

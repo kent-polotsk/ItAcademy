@@ -1,5 +1,5 @@
 ﻿@using DataConvert.DTO
-@model ArticleDto
+@model ArticleModel
 
 @{
     ViewBag.Title = Model.Title;
@@ -34,7 +34,7 @@
     </div>
 
 
-    <div class="btn-group">
+    <div class="mx-auto btn-group">
         <form asp-action="EditArticle" asp-controller="Articles" method="get">
             <input type="hidden" name="Id" value="@Model.Id" />
             <button type="submit" class="btn btn400">Редактировать</button>
@@ -44,7 +44,10 @@
             <input type="hidden" name="Id" value="@Model.Id" />
             <button type="button" class="btn btn400" onclick="confirmDelete()">Удалить</button>
         </form>
-
+        
+        <form>
+            <a class=" btn  btn400" asp-action="Index" asp-controller="Home">На главную</a>
+        </form>
     </div>
 </div>
 

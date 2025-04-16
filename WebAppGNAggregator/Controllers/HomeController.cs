@@ -1,4 +1,5 @@
 using EFDatabase;
+using EFDatabase.Entities;
 using GNA.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using WebAppGNAggregator.Mappers;
@@ -35,16 +36,17 @@ namespace WebAppGNAggregator.Controllers
         {
             try
             {
-                const double minPosRate = 0;
-                var articleDtos = (await _articleService.GetAllPositiveAsync(minPosRate, paginationModel.PageNumber, paginationModel.PageSize))
-                    .Select(a => _articleMapper.ArticleToArticleDto(a))
+                const double minPosRate = -10;
+                var articleModels = (await _articleService.GetAllPositiveAsync(minPosRate, paginationModel.PageNumber, paginationModel.PageSize))
+                    .Select(article => _articleMapper.ArticleDtoToArticleModel(article))
                     .ToArray();
 
-                _logger.LogInformation("Articles are selected");
+                _logger.LogInformation("ArticleDto[] are converted to ArticleModel[] for Index page");
 
                 var totalArticlesCount = await _articleService.CountAsync(minPosRate);
 
                 _logger.LogInformation("Articles counted");
+                
                 var pageInfo = new PageInfo()
                 {
                     PageNumber = paginationModel.PageNumber,
@@ -58,9 +60,9 @@ namespace WebAppGNAggregator.Controllers
                 ViewBag.PageSize = paginationModel.PageSize;
                 ViewBag.Page = paginationModel.PageNumber;
                 _logger.LogInformation("(Home)Index.Ok");
-                return View(new ArticleDtoCollectionModel
+                return View(new ArticleModelsCollection
                 {
-                    ArticleDtos = articleDtos,
+                    ArticleModels = articleModels,
                     PageInfo = pageInfo
                 });
             }
