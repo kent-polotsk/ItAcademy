@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Configuration;
-using WebAppGNAggregator.Mappers;
+using Mappers.Mappers;
+
 namespace WebAppGNAggregator
 {
     public class Program

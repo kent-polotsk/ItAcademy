@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DataConvert.DTO;
 using Serilog;
-using WebAppGNAggregator.Mappers;
-using WebAppGNAggregator.Models;
+using Mappers.Mappers;
+
 
 namespace WebAppGNAggregator.Controllers
 {
@@ -101,7 +101,7 @@ namespace WebAppGNAggregator.Controllers
                 return RedirectToAction("Error", "Home", new
                 {
                     statusCode = HttpContext.Response.StatusCode,
-                    errorMessage = "Такой новости нет :(<br>Почитайте что-нибудь ещё."
+                    errorMessage = $"Такой новости нет :(<br>Почитайте что-нибудь ещё.<br><br>{ex.Message}"
                 });
             }
         }
@@ -149,7 +149,7 @@ namespace WebAppGNAggregator.Controllers
                 if (articleDto != null)
                 {
                     var articleModel = _articleMapper.ArticleDtoToArticleModel(articleDto);
-                    _logger.LogInformation($"Article {articleModel.Id} edited successfully");
+                    _logger.LogInformation($"Article {articleModel.Id} loaded for editing successfully");
                     return View(articleModel);
                 }
                 else
@@ -183,7 +183,9 @@ namespace WebAppGNAggregator.Controllers
 
                 else
                 {
-                    await _articleService.SaveChangedArticleAsync(model);
+                    var editedModel = _articleMapper.ArticleModelToArticleDto(model);
+                    editedModel.Updated = DateTime.Now;
+                    await _articleService.SaveChangedArticleAsync(editedModel);
                     _logger.LogInformation($"Article {model.Id} edited successfully");
                     return RedirectToAction("Index", "Home");
                 }
@@ -197,8 +199,6 @@ namespace WebAppGNAggregator.Controllers
                     errorMessage = "Такой новости нет :(<br>Почитайте что-нибудь ещё."
                 });
             }
-
-
         }
     }
 }

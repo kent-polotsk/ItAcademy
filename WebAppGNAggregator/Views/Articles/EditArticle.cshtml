@@ -10,6 +10,10 @@
     <h2 class="text-center mb-4">Редактирование новости</h2>
 
     <input asp-for="Id" type="hidden" />
+    <input asp-for="Created" type="hidden" />
+    <input asp-for="SourceName" type="hidden" />
+
+
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <span asp-validation-for="Title" class="text-error"></span>

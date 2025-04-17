@@ -1,5 +1,4 @@
-namespace WebAppGNAggregator.Models
-{
+
     public class ErrorViewModel
     {
         public string? RequestId { get; set; }
@@ -10,4 +9,4 @@ namespace WebAppGNAggregator.Models
 
         public string ErrorMessage { get; set; }
     }
-}
+

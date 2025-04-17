@@ -2,8 +2,9 @@ using EFDatabase;
 using EFDatabase.Entities;
 using GNA.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
-using WebAppGNAggregator.Mappers;
-using WebAppGNAggregator.Models;
+using Mappers.Mappers;
+
+//using DataConvert.Models;
 
 namespace WebAppGNAggregator.Controllers
 {

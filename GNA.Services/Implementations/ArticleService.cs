@@ -6,18 +6,9 @@ using EFDatabase.Entities;
 using GNA.Services.Abstractions;
 using HtmlAgilityPack;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using WebAppGNAggregator.Mappers;
-using WebAppGNAggregator.Models;
+using Mappers.Mappers;
 
 namespace GNA.Services.Implementations
 {
@@ -164,9 +155,9 @@ namespace GNA.Services.Implementations
             return await _mediator.Send(new DeleteArticleCommand() { id = Id }, cancellationToken);
         }
 
-        public Task SaveChangedArticleAsync(ArticleModel model, CancellationToken cancellationToken = default)
+        public Task SaveChangedArticleAsync(ArticleDto atricleDto, CancellationToken cancellationToken = default)
         {
-            return _mediator.Send(new SaveChangedArticleAsyncCommand() { articleModel = model }, cancellationToken);
+            return _mediator.Send(new SaveChangedArticleAsyncCommand() { articleDto = atricleDto }, cancellationToken);
         }
 
         public async Task<object?> GetAllPositiveAsync(int minRate, int pageNumber, int pageSize)

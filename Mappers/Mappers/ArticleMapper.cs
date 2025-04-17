@@ -2,7 +2,7 @@
 using Riok.Mapperly.Abstractions;
 using DataConvert.DTO;
 
-namespace WebAppGNAggregator.Mappers
+namespace Mappers.Mappers
 {
     [Mapper]
     public partial class ArticleMapper
@@ -13,6 +13,17 @@ namespace WebAppGNAggregator.Mappers
 
         public partial ArticleModel ArticleDtoToArticleModel(ArticleDto? atricleDto);
 
+
+        public partial ArticleDto ArticleModelToArticleDto(ArticleModel? articleModel);
+
+
+
+        [MapperIgnoreTarget(nameof(Article.Source))]
+        [MapperIgnoreTarget(nameof(Article.Comments))]
+        [MapperIgnoreTarget(nameof(Article.SourceId))]
+        [MapperIgnoreTarget(nameof(Article.Url))]
+        [MapperIgnoreTarget(nameof(Article.ImageUrl))]
+        public partial void UpdateArticleFromDto(ArticleDto sourceDto, Article targetArticle);
 
     }
 }

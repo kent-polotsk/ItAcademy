@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using DataConvert.DTO;
+﻿using DataConvert.DTO;
 using EFDatabase.Entities;
-using WebAppGNAggregator.Models;
 
 
 namespace GNA.Services.Abstractions
@@ -26,6 +19,6 @@ namespace GNA.Services.Abstractions
         public Task UpdateContentByWebScrappingAsync(Guid[] ids, CancellationToken token = default);
         public Task UpdateTextForArticlesByWebScrappingAsync(CancellationToken cancellationToken);
         
-        public Task SaveChangedArticleAsync(ArticleModel model, CancellationToken token=default);
+        public Task SaveChangedArticleAsync(ArticleDto articleDto, CancellationToken token=default);
     }
 }
