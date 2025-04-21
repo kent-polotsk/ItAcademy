@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Configuration;
 using Mappers.Mappers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace WebAppGNAggregator
 {
@@ -31,8 +32,19 @@ namespace WebAppGNAggregator
             builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ISourceService, SourceService>();
             builder.Services.AddScoped<IRssService, RssService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
+
             builder.Services.AddMediatR(sc => sc.RegisterServicesFromAssembly(typeof(AddArticlesCommand).Assembly));
             builder.Services.AddTransient<ArticleMapper>();
+
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(opt => {
+                    opt.LoginPath = "/account/login";
+                    opt.AccessDeniedPath = "/account/accessdenied";
+                    opt.LogoutPath = "/account/logout";
+                });
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
@@ -52,6 +64,7 @@ namespace WebAppGNAggregator
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

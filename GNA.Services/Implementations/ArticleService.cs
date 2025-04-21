@@ -9,19 +9,18 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 using Mappers.Mappers;
+using Microsoft.EntityFrameworkCore;
 
 namespace GNA.Services.Implementations
 {
     public class ArticleService : IArticleService
     {
-        private readonly GNAggregatorContext _dbContext;
-        private readonly ILogger<ArticleService> _logger;
+        private readonly ILogger<AccountService> _logger;
         private readonly IMediator _mediator;
         private readonly ArticleMapper _articleMapper;
 
-        public ArticleService(GNAggregatorContext dbContext, ILogger<ArticleService> logger, IMediator mediator, ArticleMapper articleMapper)
+        public ArticleService(ILogger<AccountService> logger, IMediator mediator, ArticleMapper articleMapper)
         {
-            _dbContext = dbContext;
             _logger = logger;
             _mediator = mediator;
             _articleMapper = articleMapper;
@@ -32,7 +31,7 @@ namespace GNA.Services.Implementations
         {
             try
             {
-                var articleDtos = (await _mediator.Send(new GetPositiveArticlesWithPaginationQuery()
+                var articleDtos =  (await _mediator.Send(new GetPositiveArticlesWithPaginationQuery()
                 {
                     PositivityRate = minPositivityRate,
                     Page = pageNumber,
@@ -54,9 +53,6 @@ namespace GNA.Services.Implementations
 
 
 
-
-
-
         public async Task<ArticleDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var article = await _mediator.Send(new GetArticleByIdQuery() { Id = id }, cancellationToken);
@@ -68,7 +64,7 @@ namespace GNA.Services.Implementations
 
         public async Task<int> CountAsync(double minRate, CancellationToken cancellationToken)
         {
-            return await _mediator.Send(new CountArticlesQuery() { }, cancellationToken);
+            return await _mediator.Send(new CountArticlesQuery() { MinRate = minRate }, cancellationToken);
         }
 
 
@@ -85,10 +81,10 @@ namespace GNA.Services.Implementations
         }
 
 
-        public async Task UpdateContentByWebScrappingAsync(Guid[] ids, CancellationToken cancellationToken = default)
-        {
+        //public async Task UpdateContentByWebScrappingAsync(Guid[] ids, CancellationToken cancellationToken = default)
+        //{
 
-        }
+        //}
 
 
         public async Task UpdateTextForArticlesByWebScrappingAsync(CancellationToken cancellationToken = default)
@@ -160,9 +156,9 @@ namespace GNA.Services.Implementations
             return _mediator.Send(new SaveChangedArticleAsyncCommand() { articleDto = atricleDto }, cancellationToken);
         }
 
-        public async Task<object?> GetAllPositiveAsync(int minRate, int pageNumber, int pageSize)
-        {
-            throw new NotImplementedException();
-        }
+        //public async Task<object?> GetAllPositiveAsync(int minRate, int pageNumber, int pageSize)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

@@ -14,6 +14,7 @@ namespace EFDatabase
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Source> Sources { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         public GNAggregatorContext() { }
         public GNAggregatorContext(DbContextOptionsBuilder optionsBuilder) { }

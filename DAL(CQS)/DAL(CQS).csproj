@@ -12,10 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataConvert\DataConvert.csproj" />
     <ProjectReference Include="..\EFDatabase\EFDatabase.csproj" />
     <ProjectReference Include="..\Mappers\Mappers.csproj" />
-    <ProjectReference Include="..\Models\DataConvert.csproj" />
-    <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 
 </Project>

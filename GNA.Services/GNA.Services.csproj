@@ -14,8 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DAL(CQS)\DAL(CQS).csproj" />
+    <ProjectReference Include="..\DataConvert\DataConvert.csproj" />
     <ProjectReference Include="..\EFDatabase\EFDatabase.csproj" />
-    <ProjectReference Include="..\Models\DataConvert.csproj" />
   </ItemGroup>
 
 </Project>

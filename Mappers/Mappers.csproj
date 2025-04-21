@@ -3,8 +3,8 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+		<!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>-->
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
@@ -13,8 +13,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\DataConvert\DataConvert.csproj" />
 		<ProjectReference Include="..\EFDatabase\EFDatabase.csproj" />
-		<ProjectReference Include="..\Models\DataConvert.csproj" />
+		<ProjectReference Include="..\DataConvert\DataConvert.csproj" />
 	</ItemGroup>
 
 </Project>

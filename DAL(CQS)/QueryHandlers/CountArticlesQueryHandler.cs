@@ -24,6 +24,7 @@ namespace DAL_CQS_.QueryHandlers
         {
             return await _dbContext.Articles
                 .AsNoTracking()
+                .Where(a=>a.PositivityRate == null || a.PositivityRate>=request.MinRate )
                 .CountAsync(cancellationToken);
         }
     }

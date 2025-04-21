@@ -24,10 +24,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\DAL(CQS)\DAL(CQS).csproj" />
 		<ProjectReference Include="..\EFDatabase\EFDatabase.csproj" />
 		<ProjectReference Include="..\GNA.Services\GNA.Services.csproj" />
 		<ProjectReference Include="..\Mappers\Mappers.csproj" />
-		
+		<ProjectReference Include="..\DataConvert\DataConvert.csproj" />		
 	</ItemGroup>
 
 	<ItemGroup>

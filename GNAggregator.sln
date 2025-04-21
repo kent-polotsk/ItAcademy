@@ -7,15 +7,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFDatabase", "EFDatabase\EF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAppGNAggregator", "WebAppGNAggregator\WebAppGNAggregator.csproj", "{7063CC4D-A964-4E84-8370-DE44EBBCF705}"
 	ProjectSection(ProjectDependencies) = postProject
-		{4BB9F0A0-32A9-46C5-A10D-6FD854ACF413} = {4BB9F0A0-32A9-46C5-A10D-6FD854ACF413}
 		{E9326A9A-30FC-49EE-8594-9CC141ADDED0} = {E9326A9A-30FC-49EE-8594-9CC141ADDED0}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GNA.Services", "GNA.Services\GNA.Services.csproj", "{7FBFCF42-143C-4108-8E71-8E2448638FF3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F36D1076-BCFB-4C0D-9C3D-BA39015AF5F2} = {F36D1076-BCFB-4C0D-9C3D-BA39015AF5F2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL(CQS)", "DAL(CQS)\DAL(CQS).csproj", "{E9326A9A-30FC-49EE-8594-9CC141ADDED0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataConvert", "Models\DataConvert.csproj", "{4BB9F0A0-32A9-46C5-A10D-6FD854ACF413}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GNA.Services.Tests", "GNA.Services.Tests\GNA.Services.Tests.csproj", "{55E8DEC4-E0FD-4821-9A4C-5BED892377FE}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GNA.Services.Tests", "GNA.S
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mappers", "Mappers\Mappers.csproj", "{F36D1076-BCFB-4C0D-9C3D-BA39015AF5F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataConvert", "DataConvert\DataConvert.csproj", "{E2CF9395-174E-41A4-8136-9CD7EF64969E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,10 +48,6 @@ Global
 		{E9326A9A-30FC-49EE-8594-9CC141ADDED0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9326A9A-30FC-49EE-8594-9CC141ADDED0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9326A9A-30FC-49EE-8594-9CC141ADDED0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4BB9F0A0-32A9-46C5-A10D-6FD854ACF413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4BB9F0A0-32A9-46C5-A10D-6FD854ACF413}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4BB9F0A0-32A9-46C5-A10D-6FD854ACF413}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4BB9F0A0-32A9-46C5-A10D-6FD854ACF413}.Release|Any CPU.Build.0 = Release|Any CPU
 		{55E8DEC4-E0FD-4821-9A4C-5BED892377FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{55E8DEC4-E0FD-4821-9A4C-5BED892377FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55E8DEC4-E0FD-4821-9A4C-5BED892377FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,6 +56,10 @@ Global
 		{F36D1076-BCFB-4C0D-9C3D-BA39015AF5F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F36D1076-BCFB-4C0D-9C3D-BA39015AF5F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F36D1076-BCFB-4C0D-9C3D-BA39015AF5F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2CF9395-174E-41A4-8136-9CD7EF64969E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2CF9395-174E-41A4-8136-9CD7EF64969E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2CF9395-174E-41A4-8136-9CD7EF64969E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2CF9395-174E-41A4-8136-9CD7EF64969E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
