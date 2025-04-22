@@ -35,6 +35,11 @@ namespace WebAppGNAggregator.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(PaginationModel paginationModel)
         {
+            //var roles = new Role[]{ new Role { Id = Guid.NewGuid(), Name = "User" }, new Role { Id = Guid.NewGuid(), Name = "Admin" }};
+            //await _dbContext.Roles.AddRangeAsync(roles);
+            //await _dbContext.SaveChangesAsync();
+
+
             try
             {
                 const double minPosRate = -10;

@@ -39,6 +39,11 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+
+            <div aria-live="polite" aria-atomic="true" class="alert-success" style="position: relative; z-index: 1050;">
+                <div id="toast-container" style="position: fixed; top: 20px; right: 20px;"></div>
+            </div>
+
             @RenderBody()
         </main>
     </div>

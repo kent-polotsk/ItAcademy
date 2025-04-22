@@ -9,6 +9,6 @@ public class LoginModel
 
     [Required(ErrorMessage = "Введите пароль")]
     [MinLength(8,ErrorMessage ="Минимум 8 символов") ]
-    public string PasswordHash { get; set; }
+    public string Password { get; set; }
 }
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DAL_CQS_.Queries
 {
-    public class TryLoginQuery : IRequest<bool>
+    public class TryRegisterUserCommand : IRequest 
     {
         public string Email { get; set; }
         public string PasswordHash { get; set; }

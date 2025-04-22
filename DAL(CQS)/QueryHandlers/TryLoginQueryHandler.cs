@@ -21,8 +21,8 @@ namespace DAL_CQS_.QueryHandlers
         }
         public async Task<bool> Handle(TryLoginQuery request, CancellationToken cancellationToken)
         {
-            var foundUser = await _dbContext.Users.FirstOrDefaultAsync(u=>u.Email.Equals(request.LoginModel.Email),cancellationToken);
-            return foundUser != null && request.LoginModel.PasswordHash.Equals(foundUser.PasswordHash);
+            var foundUser = await _dbContext.Users.FirstOrDefaultAsync(u=>u.Email.Equals(request.Email),cancellationToken);
+            return foundUser != null && request.PasswordHash.Equals(foundUser.PasswordHash);
         }
     }
 }

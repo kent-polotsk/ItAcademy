@@ -1,32 +1,36 @@
-﻿@model LoginModel
+﻿@model RegisterModel
 
 @{
-    ViewBag.Title = "Авторизация";
+    ViewBag.Title = "Регистрация";
     Layout = "_Layout";
 }
 
-
 <div class="container d-flex justify-content-center" style="height: 100vh; align-items: flex-start; padding-top: 50px;">
     <div class="cardGeneral p-5 shadow-lg" style="width: 100%; max-width: 800px;">
-        <h4 class="card text-center mb-4">Вход в систему</h4>
+        <h4 class="card text-center mb-4">Регистрация</h4>
 
         <div style="height: 55px;">
             <div id="validationSummary" asp-validation-summary="ModelOnly" class="text-danger"></div>
         </div>
 
-        <form asp-action="Login" asp-controller="Account" method="post">
+        <form asp-action="Register" asp-controller="Account" method="post">
             <div class="mb-4 ">
                 <label asp-for="@Model.Email" class="form-label">Email</label>
                 <span asp-validation-for="@Model.Email" class="text-error" style="display: block; margin-bottom: 10px;margin-top: -6px"></span>
                 <input asp-for="@Model.Email" class="form-control" />
             </div>
             <div class="mb-4">
-                <label asp-for="@Model.Password" class="form-label">Пароль</label>
+                <label asp-for="@Model.Password" class="form-label">Пароль (должен содержать не менее 8 символов, заглавную и строчную букву, цифру и специальный символ: @@$!%*?&)</label>
                 <span asp-validation-for="@Model.Password" class="text-error" style="display: block; margin-bottom: 10px;margin-top: -6px"></span>
                 <input asp-for="@Model.Password" type="password" class="form-control" />
             </div>
+            <div class="mb-4">
+                <label asp-for="@Model.PasswordConfirm" class="form-label">Подтвердите пароль</label>
+                <span asp-validation-for="@Model.PasswordConfirm" class="text-error" style="display: block; margin-bottom: 10px;margin-top: -6px"></span>
+                <input asp-for="@Model.PasswordConfirm" type="password" class="form-control" />
+            </div>
             <div class="d-flex justify-content-center">
-                <button type="submit" class="btn btn400 btn-lg" style="width: 50%;">Войти</button>
+                <button type="submit" class="btn btn400 btn-lg" style="width: 50%;">Сохранить</button>
             </div>
         </form>
     </div>

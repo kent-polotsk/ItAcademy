@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Identity.Client;
+using System.Threading;
 
 namespace WebAppGNAggregator.Controllers
 {
@@ -39,10 +40,8 @@ namespace WebAppGNAggregator.Controllers
                 else
                 {
                     _logger.LogInformation($"User {loginModel.Email} failed to login");
-                    //ViewBag.BadLogin = "Проверьте Email или пароль";
                     ModelState.AddModelError("","Неверный логин или пароль");
                     return View(loginModel);
-                    //return View();
                 }
             }
             else 
@@ -50,6 +49,8 @@ namespace WebAppGNAggregator.Controllers
                 return View();
             }
         }
+
+
 
         [HttpGet]
         public IActionResult LogOut()
@@ -64,16 +65,43 @@ namespace WebAppGNAggregator.Controllers
         }
 
 
+        // 12345aA!
+
         [HttpGet]
-        public IActionResult Registration()
+        public IActionResult Register()
         {
-            return View();
+            _logger.LogInformation($"Show register view");
+            return View(new RegisterModel());
         }
 
         [HttpPost]
-        public IActionResult Registration(RegistrationModel loginModel)
+        public async Task<IActionResult> Register(RegisterModel registerModel, CancellationToken cancellationToken = default)
         {
-            return View();
+            _logger.LogInformation($"User {registerModel.Email} checking ");
+            
+            if (ModelState.IsValid)
+            {
+                _logger.LogInformation($"User {registerModel.Email} model is valid");
+                var success = await _accountService.TryRegister(registerModel, cancellationToken);
+
+                _logger.LogInformation($"User {registerModel.Email} registered");
+                if (success)
+                {
+                    _logger.LogInformation($"User {registerModel.Email} registered");
+                    TempData["ToastMessage"] = "Вы зарегистрированы :)";
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    _logger.LogInformation($"User {registerModel.Email} already exists");
+                    ModelState.AddModelError("", "Такой пользователь уже существует");
+                    return View(registerModel);
+                }
+            }
+            else
+            {
+                return View(registerModel);
+            }
         }
         
     }
