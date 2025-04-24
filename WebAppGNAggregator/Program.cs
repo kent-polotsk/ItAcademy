@@ -8,6 +8,7 @@ using Serilog;
 using System.Configuration;
 using Mappers.Mappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Options;
 
 namespace WebAppGNAggregator
 {
@@ -26,8 +27,9 @@ namespace WebAppGNAggregator
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddSerilog();
+
             builder.Services.AddDbContext<GNAggregatorContext>(opt =>
-            opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+                    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
             builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ISourceService, SourceService>();
@@ -36,10 +38,13 @@ namespace WebAppGNAggregator
 
             builder.Services.AddMediatR(sc => sc.RegisterServicesFromAssembly(typeof(AddArticlesCommand).Assembly));
             builder.Services.AddTransient<ArticleMapper>();
+            builder.Services.AddTransient<UserMapper>();
 
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(opt => {
+                .AddCookie(opt =>
+                {
+                    opt.ExpireTimeSpan = TimeSpan.FromDays(1);
                     opt.LoginPath = "/account/login";
                     opt.AccessDeniedPath = "/account/accessdenied";
                     opt.LogoutPath = "/account/logout";
@@ -51,9 +56,9 @@ namespace WebAppGNAggregator
             // Configure the HTTP request pipeline.
             //if (!app.Environment.IsDevelopment())
             //{
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+            app.UseExceptionHandler("/Home/Error");
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
             //}
 
             app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");

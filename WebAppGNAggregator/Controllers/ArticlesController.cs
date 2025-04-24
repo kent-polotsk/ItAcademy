@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using DataConvert.DTO;
 using Serilog;
 using Mappers.Mappers;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace WebAppGNAggregator.Controllers
 {
+    [Authorize]
     public class ArticlesController : Controller
     {
 
@@ -22,6 +24,7 @@ namespace WebAppGNAggregator.Controllers
         //private const int _sourceId = 1;
 
         private readonly ArticleMapper _articleMapper;
+
 
         public ArticlesController(ILogger<HomeController> logger, IArticleService articleService, ISourceService sourceService, IRssService rssService, ArticleMapper articleMapper)
         {
@@ -85,7 +88,6 @@ namespace WebAppGNAggregator.Controllers
                 {
                     var articleModel = _articleMapper.ArticleDtoToArticleModel(articleDto);
                     
-
                     _logger.LogInformation($"Article {articleModel.Id} retrieved successfully.");
                     return View(articleModel);
                 }

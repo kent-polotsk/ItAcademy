@@ -1,4 +1,5 @@
 ﻿@using DataConvert.DTO
+@using System.Security.Claims
 @model ArticleModel
 
 @{
@@ -12,14 +13,14 @@
     <p>
         <span>Создано @Model.Created</span>
     </p>
-    
-        @if (Model.Updated != null)
-        {
-            <p>
+
+    @if (Model.Updated != null)
+    {
+        <p>
             <span>Изменено @Model.Updated</span>
-            </p>
-        }
-    
+        </p>
+    }
+
     <p>
         <h6>Рейтинг позитивности: @Model.PositivityRate</h6>
     </p>
@@ -33,9 +34,10 @@
         </div>
     </div>
 
-
-    <div class="mx-auto btn-group">
-        <form asp-action="EditArticle" asp-controller="Articles" method="get">
+    @if (User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin"))
+    {
+        <div class="mx-auto btn-group">
+            <form asp-action="EditArticle" asp-controller="Articles" method="get">
             <input type="hidden" name="Id" value="@Model.Id" />
             <button type="submit" class="btn btn400">Редактировать</button>
         </form>
@@ -49,6 +51,7 @@
             <a class=" btn  btn400" asp-action="Index" asp-controller="Home">На главную</a>
         </form>
     </div>
+    }
 </div>
 
 <script>

@@ -12,26 +12,24 @@ using System.Threading.Tasks;
 
 namespace DAL_CQS_.QueryHandlers
 {
-    internal class TryLoginQueryHandler : IRequestHandler<TryLoginQuery, User?>
+    public class GetSaltByEmailQueryHandler : IRequestHandler<GetSaltByEmailQuery, string?>
     {
         private readonly GNAggregatorContext _dbContext;
 
-        public TryLoginQueryHandler(GNAggregatorContext dbContext) 
+        public GetSaltByEmailQueryHandler(GNAggregatorContext dbContext) 
         { 
             _dbContext = dbContext;
         }
-        public async Task<User?> Handle(TryLoginQuery request, CancellationToken cancellationToken)
+        public async Task<string?> Handle(GetSaltByEmailQuery request, CancellationToken cancellationToken)
         {
             try
             {
                 var foundUser = await _dbContext.Users
                     .AsNoTracking()
-                    .Include(x => x.Role)
+                    //.Include(x => x.Role)
                     .SingleOrDefaultAsync(u => u.Email.Equals(request.Email), cancellationToken);
 
-                return foundUser != null && request.PasswordHash.Equals(foundUser.PasswordHash)
-                    ? foundUser
-                    : null;
+                return foundUser!=null?foundUser.PasswordSalt:null;
             }
             catch (Exception ex)
             {

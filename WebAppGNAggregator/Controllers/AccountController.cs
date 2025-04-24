@@ -1,7 +1,11 @@
-﻿using GNA.Services.Abstractions;
+﻿using DataConvert.DTO;
+using GNA.Services.Abstractions;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Identity.Client;
+using System.Security.Claims;
 using System.Threading;
 
 namespace WebAppGNAggregator.Controllers
@@ -9,7 +13,7 @@ namespace WebAppGNAggregator.Controllers
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
-        private readonly ILogger<AccountController> _logger; 
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(IAccountService accountService, ILogger<AccountController> logger)
         {
@@ -26,25 +30,29 @@ namespace WebAppGNAggregator.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginModel loginModel,CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Login(LoginModel loginModel, CancellationToken cancellationToken = default)
         {
             if (ModelState.IsValid)
             {
-                var isLoginOk = await _accountService.TryLogin(loginModel, cancellationToken);
 
-                if (isLoginOk)
+                var loginDto = await _accountService.TryLogin(loginModel, cancellationToken);
+
+                if (loginDto != null)
                 {
+                    await SignIn(loginDto);
+
                     _logger.LogInformation($"User {loginModel.Email} logged in");
+
                     return RedirectToAction("Index", "Home");
                 }
                 else
                 {
                     _logger.LogInformation($"User {loginModel.Email} failed to login");
-                    ModelState.AddModelError("","Неверный логин или пароль");
+                    ModelState.AddModelError("", "Неверный логин или пароль");
                     return View(loginModel);
                 }
             }
-            else 
+            else
             {
                 return View();
             }
@@ -53,9 +61,14 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpGet]
-        public IActionResult LogOut()
+        public async Task<IActionResult> LogOut()
         {
-            return View();
+            await HttpContext.SignOutAsync();
+            //HttpContext.Response.Cookies.Clear();
+            //HttpContext.Session.Clear();
+            //HttpContext.Session.SetString("NewSessionId", Guid.NewGuid().ToString());
+            return RedirectToAction("Index", "Home");
+            //return Ok();
         }
 
         [HttpPost]
@@ -70,25 +83,24 @@ namespace WebAppGNAggregator.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            _logger.LogInformation($"Show register view");
+           // _logger.LogInformation($"Show register view");
             return View(new RegisterModel());
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterModel registerModel, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation($"User {registerModel.Email} checking ");
-            
             if (ModelState.IsValid)
             {
                 _logger.LogInformation($"User {registerModel.Email} model is valid");
-                var success = await _accountService.TryRegister(registerModel, cancellationToken);
+                var loginDto = await _accountService.TryRegister(registerModel, cancellationToken);
 
-                _logger.LogInformation($"User {registerModel.Email} registered");
-                if (success)
+                if (loginDto != null)
                 {
                     _logger.LogInformation($"User {registerModel.Email} registered");
                     TempData["ToastMessage"] = "Вы зарегистрированы :)";
+
+                    await SignIn(loginDto);
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -103,6 +115,22 @@ namespace WebAppGNAggregator.Controllers
                 return View(registerModel);
             }
         }
+
+
         
+        private async Task SignIn(LoginDto loginDto)
+        {
+            var claims = new List<Claim>
+                    {
+                        new(ClaimTypes.Email,loginDto.Email),
+                        new Claim(ClaimTypes.Role,loginDto.Role),
+                        //new Claim(ClaimTypes.Name,loginDto.Name)
+                    };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            _logger.LogInformation($"Claims are created for {claims[0].Value}");
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        }
+
     }
 }

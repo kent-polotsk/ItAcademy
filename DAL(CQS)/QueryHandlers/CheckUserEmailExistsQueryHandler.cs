@@ -11,7 +11,7 @@ using MediatR;
 
 namespace DAL_CQS_.QueryHandlers
 {
-    public class CheckUserEmailExistsQueryHandler : IRequestHandler<CheckUserEmailExistsQuery, bool>
+    public class CheckUserEmailExistsQueryHandler : IRequestHandler<CheckUserEmailExistsQuery, User?>
     {
         public readonly GNAggregatorContext _dbContext;
 
@@ -20,11 +20,12 @@ namespace DAL_CQS_.QueryHandlers
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(CheckUserEmailExistsQuery request, CancellationToken cancellationToken)
+        public async Task<User?> Handle(CheckUserEmailExistsQuery request, CancellationToken cancellationToken)
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .AnyAsync(u => u.Email.Equals(request.Email),cancellationToken);
+                .Include(u=>u.Role)
+                .SingleOrDefaultAsync(u => u.Email.Equals(request.Email),cancellationToken);
         }
     }
 }

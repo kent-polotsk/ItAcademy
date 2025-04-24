@@ -3,9 +3,9 @@ using MediatR;
 
 namespace DAL_CQS_.Queries
 {
-    public class TryLoginQuery : IRequest<User>
+    public class GetSaltByEmailQuery : IRequest<string?>
     {
         public string Email { get; set; }
-        public string PasswordHash { get; set; }
+        //public string PasswordHash { get; set; }
     }
 }

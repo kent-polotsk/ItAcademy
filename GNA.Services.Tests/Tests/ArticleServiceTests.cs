@@ -82,7 +82,7 @@ namespace GNA.Services.Tests.Tests
 
         private IMediator mediatorMock;
         private ILogger<AccountService> loggerMock;
-        private AccountService articleService;
+        private IArticleService articleService;
         //private ArticleMapper mapperMock;
         private CancellationToken cancellationToken;
 
