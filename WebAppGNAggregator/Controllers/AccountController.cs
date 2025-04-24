@@ -63,27 +63,18 @@ namespace WebAppGNAggregator.Controllers
         [HttpGet]
         public async Task<IActionResult> LogOut()
         {
+
+            var userName = User.Identity?.Name;
+            _logger.LogInformation($"User {userName} was logged out");
             await HttpContext.SignOutAsync();
-            //HttpContext.Response.Cookies.Clear();
-            //HttpContext.Session.Clear();
-            //HttpContext.Session.SetString("NewSessionId", Guid.NewGuid().ToString());
             return RedirectToAction("Index", "Home");
-            //return Ok();
         }
-
-        [HttpPost]
-        public IActionResult LogOut(LogOutModel loginModel)
-        {
-            return View();
-        }
-
 
         // 12345aA!
 
         [HttpGet]
         public IActionResult Register()
         {
-           // _logger.LogInformation($"Show register view");
             return View(new RegisterModel());
         }
 
@@ -117,14 +108,14 @@ namespace WebAppGNAggregator.Controllers
         }
 
 
-        
+
         private async Task SignIn(LoginDto loginDto)
         {
             var claims = new List<Claim>
                     {
                         new(ClaimTypes.Email,loginDto.Email),
-                        new Claim(ClaimTypes.Role,loginDto.Role),
-                        //new Claim(ClaimTypes.Name,loginDto.Name)
+                        new(ClaimTypes.Role,loginDto.Role),
+                        new(ClaimTypes.Name,loginDto.Email)
                     };
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             _logger.LogInformation($"Claims are created for {claims[0].Value}");

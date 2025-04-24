@@ -25,7 +25,6 @@ namespace GNA.Services.Implementations
 
         public async Task<LoginDto?> TryLogin(LoginModel loginModel, CancellationToken cancellationToken = default)
         {
-
             var salt = await _mediator.Send(new GetSaltByEmailQuery { Email = loginModel.Email }, cancellationToken);
 
             if (salt != null)
@@ -55,15 +54,13 @@ namespace GNA.Services.Implementations
 
                 var foundUser = await _mediator.Send(new CheckUserEmailExistsQuery { Email = registerModel.Email }, cancellationToken);
                 return _userMapper.UserToLoginDto(foundUser);
-                //return loginDto;
             }
 
         }
 
 
-        public string GetPasswordHash(string password, string saltStored = null)
+        private string GetPasswordHash(string password, string saltStored = null)
         {
-
             var salt = Encoding.UTF8.GetBytes(saltStored);
 
             if (saltStored == null)
@@ -71,10 +68,10 @@ namespace GNA.Services.Implementations
 
             using (var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password)))
             {
-                argon2.Salt = salt; // Соль (должна быть уникальной для каждого пароля)
-                argon2.MemorySize = 19456; // Количество памяти (в килобайтах)
-                argon2.Iterations = 2; // Количество итераций
-                argon2.DegreeOfParallelism = 1; // Параллельность (количество потоков)
+                argon2.Salt = salt;
+                argon2.MemorySize = 19456; 
+                argon2.Iterations = 2; 
+                argon2.DegreeOfParallelism = 1; 
 
                 var hash = argon2.GetBytes(32); // Длина хэша — 32 байта
                 return Convert.ToBase64String(hash);
@@ -82,7 +79,7 @@ namespace GNA.Services.Implementations
         }
 
 
-        public byte[] GenerateSalt()
+        private byte[] GenerateSalt()
         {
             var salt = new byte[16]; // 16 байт для соли
             using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())

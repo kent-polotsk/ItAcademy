@@ -23,7 +23,6 @@ namespace WebAppGNAggregator
 
             //builder.Environment.EnvironmentName = "Production";
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddSerilog();

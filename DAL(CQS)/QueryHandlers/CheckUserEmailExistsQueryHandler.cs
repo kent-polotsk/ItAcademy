@@ -1,11 +1,6 @@
 ﻿using DAL_CQS_.Queries;
 using EFDatabase.Entities;
 using EFDatabase;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 

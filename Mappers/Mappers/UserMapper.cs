@@ -10,7 +10,5 @@ namespace Mappers.Mappers
     {
         [MapProperty($"{nameof(Role)}.{nameof(Role.Name)}", nameof(LoginDto.Role))] 
         public partial LoginDto UserToLoginDto(User? user);
-
-       
     }
 }

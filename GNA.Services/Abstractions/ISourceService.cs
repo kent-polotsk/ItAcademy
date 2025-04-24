@@ -9,7 +9,6 @@ namespace GNA.Services.Abstractions
 {
     public interface ISourceService
     {
-        
         public Task<Source[]> GetSourceWithRssAsync(CancellationToken cancellationToken);
     }
 }

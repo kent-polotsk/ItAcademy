@@ -11,7 +11,7 @@ public class RegisterModel
     
     
     [Required(ErrorMessage = "Введите пароль")]
-    //[RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", ErrorMessage = "Пароль не отвечает требованиям")]
+    [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", ErrorMessage = "Пароль не отвечает требованиям")]
     public string Password { get; set; }
 
 

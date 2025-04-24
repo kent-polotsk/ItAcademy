@@ -57,7 +57,6 @@ namespace GNA.Services.Implementations
         {
             var article = await _mediator.Send(new GetArticleByIdQuery() { Id = id }, cancellationToken);
             return article;
-
         }
 
 
@@ -156,9 +155,5 @@ namespace GNA.Services.Implementations
             return _mediator.Send(new SaveChangedArticleAsyncCommand() { articleDto = atricleDto }, cancellationToken);
         }
 
-        //public async Task<object?> GetAllPositiveAsync(int minRate, int pageNumber, int pageSize)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

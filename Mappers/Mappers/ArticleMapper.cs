@@ -22,7 +22,5 @@ namespace Mappers.Mappers
         [MapperIgnoreTarget(nameof(Article.ImageUrl))]
         public partial void UpdateArticleFromDto(ArticleDto sourceDto, Article targetArticle);
 
-
-        //public partial IQueryable<ArticleDto> QueryableProjectionToDto(IQueryable<Article> articles);
     }
 }

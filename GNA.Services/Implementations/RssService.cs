@@ -44,7 +44,6 @@ namespace GNA.Services.Implementations
         {
             var (imageUrl, content) = GetImageUrlAndContent(item);
 
-
             var article = new Article()
             {
                 Id = Guid.NewGuid(),

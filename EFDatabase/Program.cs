@@ -10,11 +10,11 @@ namespace EFDatabase
             using (var db = new GNAggregatorContext())
             {
                 
-                await db.SaveChangesAsync();
+                //await db.SaveChangesAsync();
 
-                var u2 = await db.Users.FirstOrDefaultAsync(x => x.Name == "User2222");
-                db.Users.Remove(u2);
-                await db.SaveChangesAsync();
+                //var u2 = await db.Users.FirstOrDefaultAsync(x => x.Name == "User2222");
+                //db.Users.Remove(u2);
+                //await db.SaveChangesAsync();
 
                 //var us3 = db.Users.ToList();
                 //foreach (var u in us3) 

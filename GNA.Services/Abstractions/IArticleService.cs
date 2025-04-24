@@ -6,7 +6,6 @@ namespace GNA.Services.Abstractions
 {
     public interface IArticleService
     {
-
         public Task<int> CountAsync(double minRate, CancellationToken cancellationToken = default);
         public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
         
