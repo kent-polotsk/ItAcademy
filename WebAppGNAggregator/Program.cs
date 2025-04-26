@@ -9,6 +9,7 @@ using System.Configuration;
 using Mappers.Mappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
+using DataConvert.Models;
 
 namespace WebAppGNAggregator
 {
@@ -30,6 +31,11 @@ namespace WebAppGNAggregator
             builder.Services.AddDbContext<GNAggregatorContext>(opt =>
                     opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
+            builder.Services.Configure<EmailSettings>(
+                    builder.Configuration.GetSection("EmailSettings"));
+
+            builder.Services.AddScoped<ICodeGeneratorService, CodeGeneratorService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ISourceService, SourceService>();
             builder.Services.AddScoped<IRssService, RssService>();

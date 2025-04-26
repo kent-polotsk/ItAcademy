@@ -1,5 +1,6 @@
 ﻿using DataConvert.DTO;
 using GNA.Services.Abstractions;
+using GNA.Services.Implementations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,14 @@ namespace WebAppGNAggregator.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly ILogger<AccountController> _logger;
-
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger)
+        private readonly IEmailService _emailService;
+        private readonly ICodeGeneratorService _codeGeneratorService;
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IEmailService emailService, ICodeGeneratorService codeGeneratorService)
         {
             _accountService = accountService;
             _logger = logger;
+            _emailService = emailService;
+            _codeGeneratorService = codeGeneratorService;
         }
 
         [HttpGet]
@@ -35,6 +39,7 @@ namespace WebAppGNAggregator.Controllers
             if (ModelState.IsValid)
             {
 
+                
                 var loginDto = await _accountService.TryLogin(loginModel, cancellationToken);
 
                 if (loginDto != null)
@@ -83,6 +88,14 @@ namespace WebAppGNAggregator.Controllers
         {
             if (ModelState.IsValid)
             {
+                //await _emailService.SendEmailAsync("chukhno.d@ya.ru", "Тест", "Тестовое письмо.");
+
+                var code = _codeGeneratorService.GenerateCode() ?? "000000";
+                
+                string mailMessage = $"Данное письмо сгенерировано автоматически и не требует ответа.\n\nВаш код подтверждения : {code}\n\nНикому не сообщайте ваш одноразовый код подтверждения. Если вы не запрашивали код то просто игнорируйте данное сообщение.";
+                
+                await _emailService.SendEmailAsync(registerModel.Email, "АГРЕГАТОР ХОРОШИХ НОВОСТЕЙ - регистрация", mailMessage);
+
                 _logger.LogInformation($"User {registerModel.Email} model is valid");
                 var loginDto = await _accountService.TryRegister(registerModel, cancellationToken);
 

@@ -22,10 +22,6 @@ namespace DAL_CQS_.QueryHandlers
 
         public async Task<Source[]> Handle(GetAllSourcesWithRssQuery request, CancellationToken cancellationToken)
         {
-            //return await _dbContext.Articles.AsNoTracking()
-            //    .Where(a => !string.IsNullOrWhiteSpace(a.Url) && string.IsNullOrWhiteSpace(a.Content))
-            //    .Select(a => a.Id)
-            //    .ToArrayAsync(cancellationToken);
 
             return await _dbContext.Sources
                 .AsNoTracking()
