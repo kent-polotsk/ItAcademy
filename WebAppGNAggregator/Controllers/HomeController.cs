@@ -3,6 +3,7 @@ using EFDatabase.Entities;
 using GNA.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Mappers.Mappers;
+using Microsoft.EntityFrameworkCore;
 
 //using DataConvert.Models;
 
@@ -35,10 +36,12 @@ namespace WebAppGNAggregator.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(PaginationModel paginationModel)
         {
-            //var roles = new Role[]{ new Role { Id = Guid.NewGuid(), Name = "User" }, new Role { Id = Guid.NewGuid(), Name = "Admin" }};
-            //await _dbContext.Roles.AddRangeAsync(roles);
-            //await _dbContext.SaveChangesAsync();
-
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u=>u.Email.ToLower().Equals("chukhno.d@ya.ru"));
+            if (user != null)
+            {
+                 _dbContext.Users.Remove(user);
+                await _dbContext.SaveChangesAsync();
+            }
 
             try
             {

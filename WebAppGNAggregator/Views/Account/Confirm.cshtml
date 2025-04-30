@@ -1,0 +1,36 @@
+﻿@model string?
+@{
+    ViewBag.Title = "Подтверждение";
+    Layout = "_Layout";
+}
+
+<div class="container d-flex justify-content-center" style="height: 100vh; align-items: flex-start; padding-top: 50px;">
+    <div class="cardGeneral p-5 shadow-lg" style="width: 100%; max-width: 800px;">
+        <h4 class="card text-center mb-4">Подтверждение</h4>
+
+        @* <div style="height: 55px;">
+        </div> *@
+
+        <form asp-action="ConfirmCode" asp-controller="Account" method="post">
+            <div class="mb-4 text-center">
+                <h6 class="mx-4 alert alert-info">На указанный Email было отправлено письмо с кодом подтверждения</h6>
+                <h4 class="mx-4 mt-4">Введите одноразовый код</h4>
+            </div>
+
+            <div class="d-flex justify-content-center" >
+                <input name="code" pattern="\d+" maxlength="6" class="form-control" style="width: 80px;" required oninput="this.value = this.value.replace(/\D/g, '')" />
+            </div>
+
+
+            <div class="d-flex justify-content-center p-4">
+                <button type="submit" class="btn btn400 btn-lg" style="width: 50%; min-width:150px">Подтвердить</button>
+            </div>
+            <div class="d-flex justify-content-center">
+                <a asp-controller="Account" asp-action="ResendCode" method="post">Запросить код повторно</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+

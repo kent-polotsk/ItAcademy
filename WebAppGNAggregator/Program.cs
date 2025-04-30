@@ -27,15 +27,21 @@ namespace WebAppGNAggregator
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddSerilog();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromDays(1); // Время жизни сессии
+            });
 
             builder.Services.AddDbContext<GNAggregatorContext>(opt =>
                     opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-            builder.Services.Configure<EmailSettings>(
-                    builder.Configuration.GetSection("EmailSettings"));
+            //builder.Services.Configure<EmailSettings>(
+            //        builder.Configuration.GetSection("EmailSettings"));
 
             builder.Services.AddScoped<ICodeGeneratorService, CodeGeneratorService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ITotpWithAttemptService, TotpWithAttemptService>();
+            
             builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ISourceService, SourceService>();
             builder.Services.AddScoped<IRssService, RssService>();
@@ -58,10 +64,11 @@ namespace WebAppGNAggregator
 
             var app = builder.Build();
 
+            app.UseSession();
             // Configure the HTTP request pipeline.
             //if (!app.Environment.IsDevelopment())
             //{
-            app.UseExceptionHandler("/Home/Error");
+            //app.UseExceptionHandler("/Home/Error");
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
             //}

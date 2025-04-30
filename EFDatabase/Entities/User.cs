@@ -13,6 +13,8 @@ namespace EFDatabase.Entities
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public string PasswordSalt { get; set; }
+        public bool IsVerified { get; set; } = false;
+
         public DateTime CreatedDate { get; set; }
         public DateTime? BanDate { get; set; }
         public bool? IsAdmin { get; set; }

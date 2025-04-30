@@ -2,8 +2,6 @@
 using System.Net.Mail;
 using System.Net;
 using Microsoft.Extensions.Configuration;
-using DataConvert.Models;
-using Microsoft.Extensions.Options;
 
 
 namespace GNA.Services.Implementations
@@ -12,39 +10,30 @@ namespace GNA.Services.Implementations
 
     {
         private readonly SmtpClient _smtpClient;
-        private readonly EmailSettings _emailSettings;
+        private readonly IConfiguration _configuration;
 
-        public EmailService(IOptions<EmailSettings> emailSettings)
+        public EmailService( IConfiguration configuration)
         {
-            _emailSettings = emailSettings.Value;
+            _configuration = configuration;
 
-            _smtpClient = new SmtpClient(_emailSettings.SmtpServer)
+            _smtpClient = new SmtpClient(_configuration["EmailSettings:SmtpServer"])
             {
-                Port = _emailSettings.Port,
-                Credentials = new NetworkCredential(_emailSettings.Username, _emailSettings.Password),
-                EnableSsl = _emailSettings.EnableSsl
+                Port = int.Parse(_configuration["EmailSettings:Port"]), //_emailSettings.Port,
+                Credentials = new NetworkCredential(_configuration["EmailSettings:Username"], _configuration["EmailSettings:Password"]),
+                EnableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"]) //_emailSettings.EnableSsl
             };
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject = "", string body = "")
+        public async Task SendEmailAsync(string toEmail, string code="")
         {
-            var mailMessage = new MailMessage(_emailSettings.Username, toEmail, subject, body);
-            //_smtpClient.SendCompleted += (s, e) =>
-            //{
-            //    if (e.Error != null)
-            //    {
-            //        Console.WriteLine($"Ошибка отправки письма: {e.Error.Message}");
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine("Письмо отправлено успешно.");
-            //    }
-            //};
+            const string SUBJECT = "АГРЕГАТОР ХОРОШИХ НОВОСТЕЙ - регистрация";
+            string body = $"Данное письмо сгенерировано автоматически и не требует ответа.\n\n" +
+                          $"Ваш код подтверждения : {code}\n\n" +
+                          $"Никому не сообщайте ваш одноразовый код подтверждения. Если вы не запрашивали код то просто игнорируйте данное сообщение."; ;
 
-
+            var mailMessage = new MailMessage(_configuration["EmailSettings:Username"], toEmail, SUBJECT, body);
             await _smtpClient.SendMailAsync(mailMessage);
         }
     }
-
 }
 

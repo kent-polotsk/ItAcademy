@@ -17,12 +17,15 @@ namespace WebAppGNAggregator.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IEmailService _emailService;
         private readonly ICodeGeneratorService _codeGeneratorService;
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IEmailService emailService, ICodeGeneratorService codeGeneratorService)
+        private readonly ITotpWithAttemptService _totpWithAttemptService;
+
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IEmailService emailService, ICodeGeneratorService codeGeneratorService, ITotpWithAttemptService totpWithAttemptService)
         {
             _accountService = accountService;
             _logger = logger;
             _emailService = emailService;
             _codeGeneratorService = codeGeneratorService;
+            _totpWithAttemptService = totpWithAttemptService;
         }
 
         [HttpGet]
@@ -39,7 +42,7 @@ namespace WebAppGNAggregator.Controllers
             if (ModelState.IsValid)
             {
 
-                
+
                 var loginDto = await _accountService.TryLogin(loginModel, cancellationToken);
 
                 if (loginDto != null)
@@ -88,24 +91,19 @@ namespace WebAppGNAggregator.Controllers
         {
             if (ModelState.IsValid)
             {
-                //await _emailService.SendEmailAsync("chukhno.d@ya.ru", "Тест", "Тестовое письмо.");
-
-                var code = _codeGeneratorService.GenerateCode() ?? "000000";
-                
-                string mailMessage = $"Данное письмо сгенерировано автоматически и не требует ответа.\n\nВаш код подтверждения : {code}\n\nНикому не сообщайте ваш одноразовый код подтверждения. Если вы не запрашивали код то просто игнорируйте данное сообщение.";
-                
-                await _emailService.SendEmailAsync(registerModel.Email, "АГРЕГАТОР ХОРОШИХ НОВОСТЕЙ - регистрация", mailMessage);
-
                 _logger.LogInformation($"User {registerModel.Email} model is valid");
-                var loginDto = await _accountService.TryRegister(registerModel, cancellationToken);
 
+                HttpContext.Session.SetString("UserEmail", registerModel.Email);
+                _logger.LogInformation($"Mail {registerModel.Email} stored in session");
+
+                var loginDto = await _accountService.TryRegister(registerModel, cancellationToken);
+                
                 if (loginDto != null)
                 {
-                    _logger.LogInformation($"User {registerModel.Email} registered");
-                    TempData["ToastMessage"] = "Вы зарегистрированы :)";
-
-                    await SignIn(loginDto);
-                    return RedirectToAction("Index", "Home");
+                    var code = _totpWithAttemptService.GenerateTotpCode(registerModel.Email); 
+                    await _emailService.SendEmailAsync(registerModel.Email, code);
+                    _logger.LogInformation($"User {registerModel.Email} added but not verified, code sent");
+                    return View("Confirm", "");
                 }
                 else
                 {
@@ -120,6 +118,29 @@ namespace WebAppGNAggregator.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult ConfirmCode(string? code)
+        {
+            Console.WriteLine($"Confirm code {code} Email:{HttpContext.Session.GetString("UserEmail")}");
+            return Content(code??"123");
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ResendCode()
+        {
+            var email = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(email))
+            {
+                _logger.LogWarning("Error: Email not found in session.");
+                return RedirectToAction("Register");
+            }
+
+            var code = _totpWithAttemptService.GenerateTotpCode(email);
+            await _emailService.SendEmailAsync(email, code);
+            _logger.LogInformation($"New code for {email} created and sent");
+            return View("Confirm");
+        }
 
 
         private async Task SignIn(LoginDto loginDto)
@@ -134,6 +155,41 @@ namespace WebAppGNAggregator.Controllers
             _logger.LogInformation($"Claims are created for {claims[0].Value}");
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        }
+
+
+
+
+        [HttpPost]
+        public IActionResult VerifyCode(string inputCode, string token, RegisterModel registerModel)
+        {
+            if (!_totpWithAttemptService.ValidateToken(token, out int attemptCount, out DateTime lastAttempt))
+            {
+                return BadRequest("Токен повреждён или истёк.");
+            }
+
+            // Ограничение на количество попыток
+            if (attemptCount >= 5)
+            {
+                return BadRequest("Превышено количество попыток.");
+            }
+
+            // Ограничение на частоту (например, 1 попытка в минуту)
+            if (DateTime.UtcNow < lastAttempt.AddMinutes(1))
+            {
+                return BadRequest("Попробуйте снова через минуту.");
+            }
+
+            // Проверка TOTP
+            var generatedTotp = _totpWithAttemptService.GenerateTotpCode(registerModel.Email);
+            if (inputCode == generatedTotp)
+            {
+                return Ok("Код подтверждён успешно!");
+            }
+
+            // Генерируем новый токен с увеличенным счётчиком
+            var newToken = _totpWithAttemptService.GenerateToken(attemptCount + 1, DateTime.UtcNow);
+            return BadRequest(new { Message = "Код неверный.", Token = newToken });
         }
 
     }
