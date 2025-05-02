@@ -17,13 +17,13 @@ namespace GNA.Services.Implementations
 
         public string GenerateTotpCode(string email)
         {
-            var secretBytes1 = new HMACSHA1(Encoding.UTF8.GetBytes(_configuration["Security:SecretKey1"])).ComputeHash(Encoding.UTF8.GetBytes(email));
+            //var secretBytes = new HMACSHA1(Encoding.UTF8.GetBytes(_configuration["Security:SecretKey1"])).ComputeHash(Encoding.UTF8.GetBytes(email));
             var secretBytes = Encoding.UTF8.GetBytes(email + _configuration["Security:SecretKey1"]);
             var totp = new Totp(secretBytes, step: 30, totpSize: 6);
            
             var code = totp.ComputeTotp();
-            Console.WriteLine(Convert.ToBase64String(secretBytes1)+"HMAC");
-            Console.WriteLine(Convert.ToBase64String(secretBytes) + "NO__HMAC___getBytes");
+            //Console.WriteLine("HMAC_____"+Convert.ToBase64String(secretBytes));
+            //Console.WriteLine("NO__HMAC_"+Convert.ToBase64String(secretBytes));
             return code; // Генерируем 6-значный код
         }
 

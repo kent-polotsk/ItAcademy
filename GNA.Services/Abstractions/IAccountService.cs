@@ -1,5 +1,7 @@
 ﻿using DataConvert.DTO;
+using DataConvert.Models;
 using EFDatabase.Entities;
+using Microsoft.AspNetCore.Http;
 
 
 namespace GNA.Services.Abstractions
@@ -10,11 +12,11 @@ namespace GNA.Services.Abstractions
 
         Task<LoginDto?> TryRegister(RegisterModel registerModel, CancellationToken cancellationToken);
 
-        string GenerateSecureToken(string email);
+        string GenerateSecureToken(string email, int attemptsUsed);
 
         string EncryptToken(string plainToken);
 
-        Task<LoginDto> ValidateSecureTokenAsync(string token, string inputCode);
+        Task<ValidateTokenResult> ValidateSecureTokenAsync(ISession session, string? inputCode);
 
         string DecryptToken(string encryptedToken);
     }

@@ -1,15 +1,14 @@
-﻿using DAL_CQS_.Queries;
-using DataConvert.DTO;
+﻿using DataConvert.DTO;
 using GNA.Services.Abstractions;
-using GNA.Services.Implementations;
+using Jose;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Identity.Client;
+using NuGet.Common;
 using System.Security.Claims;
-using System.Threading;
+using System.Text;
 
 namespace WebAppGNAggregator.Controllers
 {
@@ -92,25 +91,20 @@ namespace WebAppGNAggregator.Controllers
         {
             if (ModelState.IsValid)
             {
-                //_logger.LogInformation($"User {registerModel.Email} model is valid");
-
                 HttpContext.Session.SetString("UserEmail", registerModel.Email);
-                //_logger.LogInformation($"Mail {registerModel.Email} stored in session"); //tmp
-
                 var loginDto = await _accountService.TryRegister(registerModel, cancellationToken);
-                
+                _logger.LogInformation($"Start register new user {registerModel.Email}");
+
                 if (loginDto != null)
                 {
                     var code = _totpCodeService.GenerateTotpCode(registerModel.Email);
-                    //Console.WriteLine($"code from acc controll {code} before sent"); //tmp
                     await _emailService.SendEmailAsync(registerModel.Email, code);
-                    //_logger.LogInformation($"User {registerModel.Email} added but not verified, code sent");
-
-                    var token = _accountService.GenerateSecureToken(registerModel.Email);
+                    var token = _accountService.GenerateSecureToken(registerModel.Email, 0);
                     var encryptedToken = _accountService.EncryptToken(token);
-                    HttpContext.Session.SetString("Token",encryptedToken);  //save token to session
-                    _logger.LogInformation($"Token {token}");   //tmp log
 
+                    _logger.LogInformation($"Confirmation code sent to {registerModel.Email}"); 
+                    HttpContext.Session.SetString("Token", encryptedToken); 
+                    
                     return View("Confirm", "");
                 }
                 else
@@ -132,41 +126,62 @@ namespace WebAppGNAggregator.Controllers
             var encryptedToken = HttpContext.Session.GetString("Token");
             if (encryptedToken != null)
             {
-                var token = _accountService.DecryptToken(encryptedToken);
-
-
-                var loginDto = await _accountService.ValidateSecureTokenAsync(token, code);
-                if (loginDto!=null)
+                if (!string.IsNullOrEmpty(code) && code != null)
                 {
-                    //HttpContext.Session.Remove("Token");
-                    await SignIn(loginDto);
-                    return RedirectToAction("Index", "Home");
+                    var result = await _accountService.ValidateSecureTokenAsync(HttpContext.Session, code);
+                    if (result.LoginDto != null)
+                    {
+
+                        HttpContext.Session.Remove("Token");
+
+                        // verify user in db
+
+                        await SignIn(result.LoginDto);
+                        _logger.LogInformation($"User {HttpContext.Session.GetString("Email")} has confirm 2FA code and signed in");
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"User {HttpContext.Session.GetString("Email")} doesn't confirm code : entered code doesn't match");
+                        return RedirectToAction("Error", "Home", new { statusCode = 401, errorMessage = "Неверный код. Регистрация не завершена." });
+                    }
                 }
                 else
                 {
-                    HttpContext.Session.Remove("Token");
-
-
-                   // Console.WriteLine($"Confirm code {code} Email:{HttpContext.Session.GetString("UserEmail")}");
+                    _logger.LogError($"User {HttpContext.Session.GetString("Email")} doesn't confirm code : code is null");
+                    return RedirectToAction("Error", "Home", new { statusCode = 405, errorMessage = "Неверный код (null or empty). Регистрация не завершена." });
                 }
             }
-            return Content(code??"123");
+            else
+            {
+                _logger.LogError($"User {HttpContext.Session.GetString("Email")} doesn't confirm token : token is null");
+                return RedirectToAction("Error", "Home", new { statusCode = 405, errorMessage = "Неверный токен (null). Регистрация не завершена." });
+            }
         }
 
 
         [HttpGet]
         public async Task<IActionResult> ResendCode()
         {
+            HttpContext.Session.Remove("UserEmail");                //test
+
             var email = HttpContext.Session.GetString("UserEmail");
-            if (string.IsNullOrEmpty(email))
+            var token = HttpContext.Session.GetString("Token");
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
             {
-                _logger.LogWarning("Error: Email not found in session.");
+                _logger.LogError($"Error: Email or token not found in session.");
                 return RedirectToAction("Register");
             }
 
-            var code = _totpCodeService.GenerateTotpCode(email);
-            await _emailService.SendEmailAsync(email, code);
-            _logger.LogInformation($"New code for {email} created and sent");
+            var result = await _accountService.ValidateSecureTokenAsync(HttpContext.Session,"");
+
+            if (result.Attempts <= 4)
+            {
+                var code = _totpCodeService.GenerateTotpCode(email);
+                await _emailService.SendEmailAsync(email, code);
+                _logger.LogInformation($"New code for {email} created and sent, token updated");
+            }
+            TempData["Attempts"] = 4 - result.Attempts;
             return View("Confirm");
         }
 

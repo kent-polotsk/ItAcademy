@@ -36,12 +36,15 @@ namespace WebAppGNAggregator.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(PaginationModel paginationModel)
         {
+
+            // remove my acc for reg checking
             var user = await _dbContext.Users.FirstOrDefaultAsync(u=>u.Email.ToLower().Equals("chukhno.d@ya.ru"));
             if (user != null)
             {
                  _dbContext.Users.Remove(user);
                 await _dbContext.SaveChangesAsync();
             }
+
 
             try
             {
@@ -50,11 +53,9 @@ namespace WebAppGNAggregator.Controllers
                     .Select(article => _articleMapper.ArticleDtoToArticleModel(article))
                     .ToArray();
 
-                _logger.LogInformation("ArticleDto[] are converted to ArticleModel[] for Index page");
-
                 var totalArticlesCount = await _articleService.CountAsync(minPosRate);
 
-                _logger.LogInformation("Articles counted");
+                _logger.LogInformation("Articles are loaded for page");
                 
                 var pageInfo = new PageInfo()
                 {
@@ -63,12 +64,12 @@ namespace WebAppGNAggregator.Controllers
                     TotalItems = totalArticlesCount
                 };
 
-                _logger.LogInformation("PageInfo created");
                 pageInfo.DeviceType = HttpContext.Request.Headers["User-Agent"].ToString().Contains("Mobi") ? 1 : 5;
 
                 ViewBag.PageSize = paginationModel.PageSize;
                 ViewBag.Page = paginationModel.PageNumber;
-                _logger.LogInformation("(Home)Index.Ok");
+
+                _logger.LogInformation("Main page /Home/Index was loaded");
                 return View(new ArticleModelsCollection
                 {
                     ArticleModels = articleModels,

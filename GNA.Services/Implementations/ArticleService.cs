@@ -40,7 +40,6 @@ namespace GNA.Services.Implementations
                     .Select(article => _articleMapper.ArticleToArticleDto(article))
                     .ToArray();
 
-                _logger.LogInformation("Articles are selected and converted to ArticleDtos");
                 return articleDtos;
 
             }

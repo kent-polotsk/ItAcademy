@@ -1,11 +1,14 @@
 ﻿using DAL_CQS_.Queries;
 using DataConvert.DTO;
+using DataConvert.Models;
 using GNA.Services.Abstractions;
 using Jose;
 using Konscious.Security.Cryptography;
 using Mappers.Mappers;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OtpNet;
@@ -100,17 +103,17 @@ namespace GNA.Services.Implementations
 
 
 
-        public string GenerateSecureToken(string email)
+        public string GenerateSecureToken(string email, int attemptsUsed = 0)
         {
             var payload = new
             {
                 email,
-                exp = DateTime.UtcNow.AddMinutes(6), // token lifetime
-                attempts = 0// max try count
+                exp = DateTime.UtcNow.AddMinutes(5), // token lifetime
+                attempts = attemptsUsed// max try count
             };
 
             string secretKey = _config["Security:SecretFor2faToken"];// in config
-            var a= JWT.Encode(payload, Encoding.UTF8.GetBytes(secretKey), JwsAlgorithm.HS256);
+            var a = JWT.Encode(payload, Encoding.UTF8.GetBytes(secretKey), JwsAlgorithm.HS256);
             return a;
         }
 
@@ -148,33 +151,73 @@ namespace GNA.Services.Implementations
             return Encoding.UTF8.GetString(decryptedBytes);
         }
 
-        public async Task<LoginDto> ValidateSecureTokenAsync(string token, string inputCode)
+        public async Task<ValidateTokenResult> ValidateSecureTokenAsync(ISession session, string? inputCode = "")
         {
-            string secretKey = _config["Security:SecretFor2faToken"];
-            var payload = JWT.Decode<Dictionary<string, object>>(token, Encoding.UTF8.GetBytes(secretKey), JwsAlgorithm.HS256);
-
-            string email = payload["email"].ToString() ?? "";
-            DateTime expTime = DateTime.Parse(payload["exp"].ToString());
-            int attempts = Convert.ToInt32(payload["attempts"]);
-
-            if (DateTime.UtcNow > expTime || attempts >= 5)
-                return null;
-
-            var secretBytes = Encoding.UTF8.GetBytes(email + _config["Security:SecretKey1"]);
-            var totp = new Totp(secretBytes, step: 30, totpSize: 6);
-            bool isValid = totp.VerifyTotp(inputCode, out _, VerificationWindow.RfcSpecifiedNetworkDelay);
-
-            if (isValid)
+            try
             {
-                var cancellationToken = new CancellationToken();
-                var user = await _mediator.Send(new CheckUserEmailExistsQuery() { Email = email }, cancellationToken);
-                if (user != null)
+                string secretKey = _config["Security:SecretFor2faToken"];
+                var token = session.GetString("Token");
+                string decodedToken = DecryptToken(token);
+
+                var payload = JWT.Decode<Dictionary<string, object>>(decodedToken, Encoding.UTF8.GetBytes(secretKey), JwsAlgorithm.HS256);
+                string email = payload["email"].ToString() ?? "";
+                DateTime expTime = DateTime.Parse(payload["exp"].ToString());
+                int attempts = Convert.ToInt32(payload["attempts"]);
+
+
+                var result = new ValidateTokenResult() { LoginDto = null, Attempts = attempts, IsCodeConfirmed = false };
+
+                if (DateTime.UtcNow > expTime)
                 {
-                    var loginDto = _userMapper.UserToLoginDto(user);
-                    return loginDto;
+                    result.Attempts = -1;
+                    return result;
                 }
+                else if (attempts >= 4)
+                {
+                    return result;
+                }
+                else
+                {
+                    //generate totp for checking
+                    var secretBytes = Encoding.UTF8.GetBytes(email + _config["Security:SecretKey1"]);
+                    var totp = new Totp(secretBytes, step: 30, totpSize: 6);
+
+                    //check code
+                    bool codeIsValid = totp.VerifyTotp(inputCode, out _, new VerificationWindow(2, 1));
+
+                    if (codeIsValid) //find user
+                    {
+                        var cancellationToken = new CancellationToken();
+                        var user = await _mediator.Send(new CheckUserEmailExistsQuery() { Email = email }, cancellationToken);
+                        if (user != null)
+                        {
+                            result.LoginDto = _userMapper.UserToLoginDto(user);
+                            result.Attempts = attempts;
+                            result.IsCodeConfirmed = true;
+                        }
+                    }
+
+                    attempts++;
+                    payload["attempts"] = attempts.ToString();
+
+                    string newToken = JWT.Encode(payload, Encoding.UTF8.GetBytes(secretKey), JwsAlgorithm.HS256);
+                    var encryptedToken = EncryptToken(newToken);
+                    session.SetString("Token", encryptedToken);
+
+                    //result.Attempts = -2;
+                }
+
+
+                // -1 token expired
+                // -2 code don't match
+                // 0 ok
+                // >0 => attempts count
+                return result;
             }
-            return null;
+            catch 
+            {
+                throw;
+            }
         }
     }
 }
