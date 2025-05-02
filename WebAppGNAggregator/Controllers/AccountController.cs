@@ -1,6 +1,8 @@
-﻿using DataConvert.DTO;
+﻿using DAL_CQS_.Queries;
+using DataConvert.DTO;
 using GNA.Services.Abstractions;
 using GNA.Services.Implementations;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -17,15 +19,17 @@ namespace WebAppGNAggregator.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IEmailService _emailService;
         private readonly ICodeGeneratorService _codeGeneratorService;
-        private readonly ITotpWithAttemptService _totpWithAttemptService;
+        private readonly ITotpCodeService _totpCodeService;
+        private readonly IMediator _mediator;
 
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IEmailService emailService, ICodeGeneratorService codeGeneratorService, ITotpWithAttemptService totpWithAttemptService)
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger, IEmailService emailService, ICodeGeneratorService codeGeneratorService, ITotpCodeService totpCodeService, IMediator mediator)
         {
             _accountService = accountService;
             _logger = logger;
             _emailService = emailService;
             _codeGeneratorService = codeGeneratorService;
-            _totpWithAttemptService = totpWithAttemptService;
+            _totpCodeService = totpCodeService;
+            _mediator = mediator;
         }
 
         [HttpGet]
@@ -41,8 +45,6 @@ namespace WebAppGNAggregator.Controllers
         {
             if (ModelState.IsValid)
             {
-
-
                 var loginDto = await _accountService.TryLogin(loginModel, cancellationToken);
 
                 if (loginDto != null)
@@ -71,7 +73,6 @@ namespace WebAppGNAggregator.Controllers
         [HttpGet]
         public async Task<IActionResult> LogOut()
         {
-
             var userName = User.Identity?.Name;
             _logger.LogInformation($"User {userName} was logged out");
             await HttpContext.SignOutAsync();
@@ -91,18 +92,25 @@ namespace WebAppGNAggregator.Controllers
         {
             if (ModelState.IsValid)
             {
-                _logger.LogInformation($"User {registerModel.Email} model is valid");
+                //_logger.LogInformation($"User {registerModel.Email} model is valid");
 
                 HttpContext.Session.SetString("UserEmail", registerModel.Email);
-                _logger.LogInformation($"Mail {registerModel.Email} stored in session");
+                //_logger.LogInformation($"Mail {registerModel.Email} stored in session"); //tmp
 
                 var loginDto = await _accountService.TryRegister(registerModel, cancellationToken);
                 
                 if (loginDto != null)
                 {
-                    var code = _totpWithAttemptService.GenerateTotpCode(registerModel.Email); 
+                    var code = _totpCodeService.GenerateTotpCode(registerModel.Email);
+                    //Console.WriteLine($"code from acc controll {code} before sent"); //tmp
                     await _emailService.SendEmailAsync(registerModel.Email, code);
-                    _logger.LogInformation($"User {registerModel.Email} added but not verified, code sent");
+                    //_logger.LogInformation($"User {registerModel.Email} added but not verified, code sent");
+
+                    var token = _accountService.GenerateSecureToken(registerModel.Email);
+                    var encryptedToken = _accountService.EncryptToken(token);
+                    HttpContext.Session.SetString("Token",encryptedToken);  //save token to session
+                    _logger.LogInformation($"Token {token}");   //tmp log
+
                     return View("Confirm", "");
                 }
                 else
@@ -119,9 +127,29 @@ namespace WebAppGNAggregator.Controllers
         }
 
         [HttpPost]
-        public IActionResult ConfirmCode(string? code)
+        public async Task<IActionResult> ConfirmCode(string? code)
         {
-            Console.WriteLine($"Confirm code {code} Email:{HttpContext.Session.GetString("UserEmail")}");
+            var encryptedToken = HttpContext.Session.GetString("Token");
+            if (encryptedToken != null)
+            {
+                var token = _accountService.DecryptToken(encryptedToken);
+
+
+                var loginDto = await _accountService.ValidateSecureTokenAsync(token, code);
+                if (loginDto!=null)
+                {
+                    //HttpContext.Session.Remove("Token");
+                    await SignIn(loginDto);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    HttpContext.Session.Remove("Token");
+
+
+                   // Console.WriteLine($"Confirm code {code} Email:{HttpContext.Session.GetString("UserEmail")}");
+                }
+            }
             return Content(code??"123");
         }
 
@@ -136,7 +164,7 @@ namespace WebAppGNAggregator.Controllers
                 return RedirectToAction("Register");
             }
 
-            var code = _totpWithAttemptService.GenerateTotpCode(email);
+            var code = _totpCodeService.GenerateTotpCode(email);
             await _emailService.SendEmailAsync(email, code);
             _logger.LogInformation($"New code for {email} created and sent");
             return View("Confirm");
@@ -155,41 +183,6 @@ namespace WebAppGNAggregator.Controllers
             _logger.LogInformation($"Claims are created for {claims[0].Value}");
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-        }
-
-
-
-
-        [HttpPost]
-        public IActionResult VerifyCode(string inputCode, string token, RegisterModel registerModel)
-        {
-            if (!_totpWithAttemptService.ValidateToken(token, out int attemptCount, out DateTime lastAttempt))
-            {
-                return BadRequest("Токен повреждён или истёк.");
-            }
-
-            // Ограничение на количество попыток
-            if (attemptCount >= 5)
-            {
-                return BadRequest("Превышено количество попыток.");
-            }
-
-            // Ограничение на частоту (например, 1 попытка в минуту)
-            if (DateTime.UtcNow < lastAttempt.AddMinutes(1))
-            {
-                return BadRequest("Попробуйте снова через минуту.");
-            }
-
-            // Проверка TOTP
-            var generatedTotp = _totpWithAttemptService.GenerateTotpCode(registerModel.Email);
-            if (inputCode == generatedTotp)
-            {
-                return Ok("Код подтверждён успешно!");
-            }
-
-            // Генерируем новый токен с увеличенным счётчиком
-            var newToken = _totpWithAttemptService.GenerateToken(attemptCount + 1, DateTime.UtcNow);
-            return BadRequest(new { Message = "Код неверный.", Token = newToken });
         }
 
     }

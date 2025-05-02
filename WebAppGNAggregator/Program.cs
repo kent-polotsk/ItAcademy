@@ -40,7 +40,7 @@ namespace WebAppGNAggregator
 
             builder.Services.AddScoped<ICodeGeneratorService, CodeGeneratorService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<ITotpWithAttemptService, TotpWithAttemptService>();
+            builder.Services.AddScoped<ITotpCodeService, TotpCodeService>();
             
             builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ISourceService, SourceService>();
