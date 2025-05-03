@@ -1,4 +1,5 @@
-﻿using DataConvert.DTO;
+﻿using DAL_CQS_.Commands;
+using DataConvert.DTO;
 using GNA.Services.Abstractions;
 using Jose;
 using MediatR;
@@ -6,6 +7,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using NuGet.Common;
 using System.Security.Claims;
 using System.Text;
@@ -91,7 +94,7 @@ namespace WebAppGNAggregator.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpContext.Session.SetString("UserEmail", registerModel.Email);
+                HttpContext.Session.SetString("Email", registerModel.Email);
                 var loginDto = await _accountService.TryRegister(registerModel, cancellationToken);
                 _logger.LogInformation($"Start register new user {registerModel.Email}");
 
@@ -124,7 +127,8 @@ namespace WebAppGNAggregator.Controllers
         public async Task<IActionResult> ConfirmCode(string? code)
         {
             var encryptedToken = HttpContext.Session.GetString("Token");
-            if (encryptedToken != null)
+            var email = HttpContext.Session.GetString("Email");
+            if (encryptedToken != null && email != null)
             {
                 if (!string.IsNullOrEmpty(code) && code != null)
                 {
@@ -133,39 +137,51 @@ namespace WebAppGNAggregator.Controllers
                     {
 
                         HttpContext.Session.Remove("Token");
-
-                        // verify user in db
+                        
+                        var isVerified = await _mediator.Send(new VerifyConfirmedUserCommand() { Email = email });// verify user in db
+                       
+                        if (!isVerified) 
+                        {
+                            _logger.LogError($"Error during verifying {email} in DB");
+                            await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email }); //delete if not confirmed
+                            return RedirectToAction("Error", "Home", new { statusCode = 405, errorMessage = "Неверный код (null or empty). Регистрация не завершена." });
+                        }
 
                         await SignIn(result.LoginDto);
-                        _logger.LogInformation($"User {HttpContext.Session.GetString("Email")} has confirm 2FA code and signed in");
+                        _logger.LogInformation($"User {email} has confirm 2FA code and signed in");
                         return RedirectToAction("Index", "Home");
                     }
                     else
                     {
-                        _logger.LogWarning($"User {HttpContext.Session.GetString("Email")} doesn't confirm code : entered code doesn't match");
+                        
+                        _logger.LogWarning($"User {email} doesn't confirm code : entered code doesn't match");
+                         await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email }); //delete if not confirmed
                         return RedirectToAction("Error", "Home", new { statusCode = 401, errorMessage = "Неверный код. Регистрация не завершена." });
                     }
                 }
                 else
                 {
-                    _logger.LogError($"User {HttpContext.Session.GetString("Email")} doesn't confirm code : code is null");
-                    return RedirectToAction("Error", "Home", new { statusCode = 405, errorMessage = "Неверный код (null or empty). Регистрация не завершена." });
+                    _logger.LogError($"User {email} doesn't confirm code : code is null");
+                     await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email }); //delete if not confirmed
+                    return RedirectToAction("Error", "Home", new { statusCode = 500, errorMessage = "Неверный код. Регистрация не завершена." });
                 }
             }
             else
             {
-                _logger.LogError($"User {HttpContext.Session.GetString("Email")} doesn't confirm token : token is null");
-                return RedirectToAction("Error", "Home", new { statusCode = 405, errorMessage = "Неверный токен (null). Регистрация не завершена." });
+                _logger.LogError($"User {email} doesn't confirm code : token is null");
+                await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email }); //delete if not confirmed
+                return RedirectToAction("Error", "Home", new { statusCode = 500, errorMessage = "Неверный токен. Регистрация не завершена." });
             }
+            _logger.LogError($"User {email} doesn't confirm token : token is null");
+            var isDeleted = await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email }); //delete if not confirmed
+            return RedirectToAction("Error", "Home", new { statusCode = 405, errorMessage = "Неверный код (null or empty). Регистрация не завершена." });
         }
 
 
         [HttpGet]
         public async Task<IActionResult> ResendCode()
         {
-            HttpContext.Session.Remove("UserEmail");                //test
-
-            var email = HttpContext.Session.GetString("UserEmail");
+            var email = HttpContext.Session.GetString("Email");
             var token = HttpContext.Session.GetString("Token");
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
             {
@@ -180,6 +196,11 @@ namespace WebAppGNAggregator.Controllers
                 var code = _totpCodeService.GenerateTotpCode(email);
                 await _emailService.SendEmailAsync(email, code);
                 _logger.LogInformation($"New code for {email} created and sent, token updated");
+            }
+            else
+            {
+                _logger.LogInformation($"{email} not confirmed: attempts limit");
+                await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email});
             }
             TempData["Attempts"] = 4 - result.Attempts;
             return View("Confirm");

@@ -22,24 +22,24 @@
                 <button type="submit" class="btn btn400 btn-lg" style="width: 50%; min-width:150px">Подтвердить</button>
             </div>
 
-            @if (TempData["Attempts"] == null)
+            @if (TempData["Attempts"] == null )
             {
                 <div class="d-flex justify-content-center">
                     <p id="countdown">Запросить код повторно можно через: 60 сек</p>
                     <a id="resendLink" asp-controller="Account" asp-action="ResendCode" method="post" style="display: none;">Запросить код повторно</a>
+
                 </div>
             }
-            else if (TempData["Attempts"].ToString() == "0")
+            else if (TempData["Attempts"] != null && TempData["Attempts"].ToString() == "0")
             {
-                <div class="text-warning d-flex justify-content-center">Вы исчерпали допустимое количество запросов кода</div>
+            <div class="text-warning align-items-center text-center">Вы исчерпали допустимое количество запросов кода.</div>
             }
-            else
-            {
-                <div class="d-flex flex-column align-items-center">
-                    <div >Попыток осталось : @TempData["Attempts"].ToString()</div>
-                    <div id="countdown">Запросить код повторно можно через: 60 сек</div>
-                    <a id="resendLink" asp-controller="Account" asp-action="ResendCode" method="post" style="display: none;">Запросить код повторно</a>
-                </div>
+            else{
+            <div class="d-flex flex-column align-items-center">
+                <div>Попыток осталось : @TempData["Attempts"].ToString()</div>
+                <div id="countdown">Запросить код повторно можно через: 6 сек</div>
+                <a id="resendLink" asp-controller="Account" asp-action="ResendCode" method="post" style="display: none;">Запросить код повторно</a>
+            </div>
             }
         </form>
     </div>

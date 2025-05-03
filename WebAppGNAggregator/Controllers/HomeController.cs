@@ -39,7 +39,7 @@ namespace WebAppGNAggregator.Controllers
 
             // remove my acc for reg checking
             var user = await _dbContext.Users.FirstOrDefaultAsync(u=>u.Email.ToLower().Equals("chukhno.d@ya.ru"));
-            if (user != null)
+            if (user != null && user.IsVerified==false)
             {
                  _dbContext.Users.Remove(user);
                 await _dbContext.SaveChangesAsync();
@@ -48,7 +48,7 @@ namespace WebAppGNAggregator.Controllers
 
             try
             {
-                const double minPosRate = -10;
+                const double minPosRate = -5;
                 var articleModels = (await _articleService.GetAllPositiveAsync(minPosRate, paginationModel.PageNumber, paginationModel.PageSize))
                     .Select(article => _articleMapper.ArticleDtoToArticleModel(article))
                     .ToArray();

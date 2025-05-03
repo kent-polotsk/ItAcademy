@@ -5,16 +5,16 @@
     Layout = "_Layout";
 }
 
-<div> 
+<div>
     <ul class="highlighted shadow-lg" float=left id="currentTime"></ul>
 </div>
 
 <div>
     <h5>
         Элементов на странице:
-        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="5" class="@(Model.PageInfo.PageSize == 5 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 5 ? "style1" : "")">5</a>
-        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="10" class="@(Model.PageInfo.PageSize == 10 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 10 ? "style1" : "")">10</a>
         <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="15" class="@(Model.PageInfo.PageSize == 15 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 15 ? "style1" : "")">15</a>
+        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="30" class="@(Model.PageInfo.PageSize == 30 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 30 ? "style1" : "")">30</a>
+        <a asp-action="Index" asp-route-page="@Model.PageInfo.PageNumber" asp-route-pageSize="50" class="@(Model.PageInfo.PageSize == 50 ? "active-link" : "")" style="@(Model.PageInfo.PageSize == 50 ? "style1" : "")">50</a>
     </h5>
 </div>
 
@@ -23,35 +23,42 @@
     <a class="btn  btn400" asp-action="Index" asp-controller="Sources">Sources</a>
 </div>
 
+
+<div class="container">
+    <div class="row" data-masonry='{"percentPosition": true }'>
 @foreach (var article in Model.ArticleModels)
 {
-    <div class="cardGeneral shadow-lg">
-        <div>
-            <div class="card">@article.Title</div>
-            <br>
-            <h5>@article.Created</h5>
-        </div>
-        <div>
-            <p>
-                @Html.Raw(article.Description)
-            </p>          
-            <a asp-action="Details" asp-controller="Articles" asp-route-id="@article.Id">Подробнее</a>
-        </div>
-        <div>
-            <h4>@article.SourceName</h4>
-            <span>Rate: @article.PositivityRate</span>
+    <div class="col-12 col-md-4 mb-3">
+        <div class="cardGeneral shadow-lg">
+            <div>
+                <div class="card">@article.Title</div>
+                <br>
+                <h5>@article.Created</h5>
+            </div>
+            <div>
+                <p>
+                    @Html.Raw(article.Description)
+                </p>
+                <a asp-action="Details" asp-controller="Articles" asp-route-id="@article.Id">Подробнее</a>
+            </div>
+            <div>
+                <h4>@article.SourceName</h4>
+                <span>Rate: @article.PositivityRate</span>
+            </div>
         </div>
     </div>
-
 }
+
+    </div>
+</div>
 <br>
 <div class="d-flex justify-content-center">
-<pagination page-action="index" page-info="Model.PageInfo"></pagination>
+    <pagination page-action="index" page-info="Model.PageInfo"></pagination>
 </div>
 
 
 <script>
-    function updateTime() 
+    function updateTime()
     {
         var now = new Date();
         var options = {
@@ -68,36 +75,4 @@
     setInterval(updateTime, 500);
     updateTime();
 
-
-
-     document.addEventListener("DOMContentLoaded", function () {
-        const toastContainer = document.getElementById("toast-container");
-
-        // Проверяем, есть ли сообщение в TempData
-    @if (TempData["ToastMessage"] != null)
-    {
-        <text>
-                const message = '@TempData["ToastMessage"]';
-                const toastHTML = `
-                    <div class="toast show align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" style="opacity: 1; transition: opacity 0.5s;">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                ${message}
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>`;
-                toastContainer.innerHTML = toastHTML;
-
-                // Автоматическое скрытие через 5 секунд
-                setTimeout(() => {
-                    const toast = document.querySelector(".toast");
-                    if (toast) {
-                        toast.style.opacity = "0"; // Плавное исчезновение
-                        setTimeout(() => toast.remove(), 500); // Удаление через 0.5 секунд после исчезновения
-                    }
-                }, 5000);
-        </text>
-    }
-    });
 </script>

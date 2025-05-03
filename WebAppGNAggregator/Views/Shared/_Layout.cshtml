@@ -85,7 +85,18 @@
         });
     </script>
 
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var grid = document.querySelector('.row'); // Выбираем контейнер карточек
+            new Masonry(grid, {
+                itemSelector: '.col-md-4',
+                percentPosition: true
+            });
+        });
+    </script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
