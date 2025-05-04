@@ -38,12 +38,12 @@ namespace WebAppGNAggregator.Controllers
         {
 
             // remove my acc for reg checking
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u=>u.Email.ToLower().Equals("chukhno.d@ya.ru"));
-            if (user != null && user.IsVerified==false)
-            {
-                 _dbContext.Users.Remove(user);
-                await _dbContext.SaveChangesAsync();
-            }
+            //var user = await _dbContext.Users.FirstOrDefaultAsync(u=>u.Email.ToLower().Equals("chukhno.d@ya.ru"));
+            //if (user != null && user.IsVerified==false)
+            //{
+            //     _dbContext.Users.Remove(user);
+            //    await _dbContext.SaveChangesAsync();
+            //}
 
 
             try

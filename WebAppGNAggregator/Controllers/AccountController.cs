@@ -1,4 +1,5 @@
 ﻿using DAL_CQS_.Commands;
+using DAL_CQS_.Queries;
 using DataConvert.DTO;
 using GNA.Services.Abstractions;
 using Jose;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using NuGet.Common;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 
@@ -47,23 +49,57 @@ namespace WebAppGNAggregator.Controllers
         {
             if (ModelState.IsValid)
             {
-                var loginDto = await _accountService.TryLogin(loginModel, cancellationToken);
-
-                if (loginDto != null)
+                var isUserExists = await _mediator.Send(new CheckUserEmailExistsQuery() { Email = loginModel.Email });
+                if (isUserExists!=null)
                 {
-                    await SignIn(loginDto);
+                    var isVerified = await _mediator.Send(new CheckIsUserVerifiedQuery() { Email = loginModel.Email });
+                    if (isVerified)
+                    {
+                        var loginDto = await _accountService.TryLogin(loginModel, cancellationToken);
 
-                    _logger.LogInformation($"User {loginModel.Email} logged in");
+                        if (loginDto != null)
+                        {
+                            await SignIn(loginDto);
 
-                    return RedirectToAction("Index", "Home");
+                            _logger.LogInformation($"User {loginModel.Email} logged in");
+
+                            return RedirectToAction("Index", "Home");
+                        }
+                        else
+                        {
+                            _logger.LogInformation($"User {loginModel.Email} failed to login");
+                            ModelState.AddModelError("", "Неверный логин или пароль");
+                            return View(loginModel);
+                        }
+                    }
+                    else
+                    {
+                        HttpContext.Session.SetString("Email", loginModel.Email);
+                        var code = _totpCodeService.GenerateTotpCode(loginModel.Email);
+
+                        try
+                        {
+                            await _emailService.SendEmailAsync(loginModel.Email, code);
+                        }
+                        catch (SmtpException ex)
+                        {
+                            _logger.LogInformation($"Unable sent code to {loginModel.Email} : wrong email ({ex.Message})");
+                            return RedirectToAction("Error", "Home", new { statusCode = 500, errorMessage = "Ошибка отправки письма. Проверьте email." });
+                        }
+
+                        var token = _accountService.GenerateSecureToken(loginModel.Email, 0);
+                        var encryptedToken = _accountService.EncryptToken(token);
+
+                        _logger.LogInformation($"Confirmation code sent to {loginModel.Email}");
+                        HttpContext.Session.SetString("Token", encryptedToken);
+                        return View("Confirm", "");
+                    }
                 }
-                else
+                else 
                 {
-                    _logger.LogInformation($"User {loginModel.Email} failed to login");
-                    ModelState.AddModelError("", "Неверный логин или пароль");
-                    return View(loginModel);
+                    return RedirectToAction("Register","Account");
                 }
-            }
+            } 
             else
             {
                 return View();
@@ -172,9 +208,6 @@ namespace WebAppGNAggregator.Controllers
                 await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email }); //delete if not confirmed
                 return RedirectToAction("Error", "Home", new { statusCode = 500, errorMessage = "Неверный токен. Регистрация не завершена." });
             }
-            _logger.LogError($"User {email} doesn't confirm token : token is null");
-            var isDeleted = await _mediator.Send(new DeleteNotConfirmedUserCommand() { Email = email }); //delete if not confirmed
-            return RedirectToAction("Error", "Home", new { statusCode = 405, errorMessage = "Неверный код (null or empty). Регистрация не завершена." });
         }
 
 

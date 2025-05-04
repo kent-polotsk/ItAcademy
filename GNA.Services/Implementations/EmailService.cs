@@ -26,6 +26,7 @@ namespace GNA.Services.Implementations
 
         public async Task SendEmailAsync(string toEmail, string code="")
         {
+
             const string SUBJECT = "АГРЕГАТОР ХОРОШИХ НОВОСТЕЙ - регистрация";
             string body = $"Данное письмо сгенерировано автоматически и не требует ответа.\n\n" +
                           $"Ваш код подтверждения : {code}\n\n" +
@@ -33,6 +34,7 @@ namespace GNA.Services.Implementations
 
             var mailMessage = new MailMessage(_configuration["EmailSettings:Username"], toEmail, SUBJECT, body);
             await _smtpClient.SendMailAsync(mailMessage);
+
         }
     }
 }
