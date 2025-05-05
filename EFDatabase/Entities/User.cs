@@ -9,6 +9,8 @@
         public string PasswordSalt { get; set; }
         public bool IsVerified { get; set; } = false;
 
+        public double PositivityRate { get; set; } = 0;
+
         public DateTime CreatedDate { get; set; }
         public DateTime? BanDate { get; set; }
         public bool? IsAdmin { get; set; }

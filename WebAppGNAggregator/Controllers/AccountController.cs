@@ -2,15 +2,10 @@
 using DAL_CQS_.Queries;
 using DataConvert.DTO;
 using GNA.Services.Abstractions;
-using Jose;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using NuGet.Common;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;

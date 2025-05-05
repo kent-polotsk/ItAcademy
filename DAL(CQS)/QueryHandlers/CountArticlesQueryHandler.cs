@@ -18,7 +18,7 @@ namespace DAL_CQS_.QueryHandlers
         {
             return await _dbContext.Articles
                 .AsNoTracking()
-                .Where(a=>a.PositivityRate == null || a.PositivityRate>=request.MinRate )
+                .Where(a=> a.PositivityRate>=request.MinRate ) //a.PositivityRate == null ||
                 .CountAsync(cancellationToken);
         }
     }

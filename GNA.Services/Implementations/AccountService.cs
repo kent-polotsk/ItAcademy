@@ -204,14 +204,8 @@ namespace GNA.Services.Implementations
                     var encryptedToken = EncryptToken(newToken);
                     session.SetString("Token", encryptedToken);
 
-                    //result.Attempts = -2;
                 }
 
-
-                // -1 token expired
-                // -2 code don't match
-                // 0 ok
-                // >0 => attempts count
                 return result;
             }
             catch 
