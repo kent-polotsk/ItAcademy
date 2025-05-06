@@ -4,6 +4,7 @@ using EFDatabase.Entities;
 using Mappers.Mappers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace WebAppGNAggregator.Controllers
 {
@@ -52,8 +53,17 @@ namespace WebAppGNAggregator.Controllers
         public IActionResult Profile(UserDto userDto = null)
         {
             //var isSaved = _userService.SaveUser(userDto);
-            
-            return View("Profile", new[] { -4.3, 3.3 });
+            if (ModelState.IsValid)
+            {
+                //save
+                _logger.LogInformation("saved : " + userDto.PositivityRate);
+                TempData["Saved"]= "Данные сохранены";
+                return View(userDto);
+            }
+            else
+            {
+                return View(userDto);
+            }
         }
     }
 }

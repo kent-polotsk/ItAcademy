@@ -96,3 +96,9 @@ header {
     font-size: 18px;
 }
 
+.readonly-input {
+    border: none;
+    background: transparent;
+    cursor: default;
+}
+
