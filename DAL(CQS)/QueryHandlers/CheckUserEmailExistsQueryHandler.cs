@@ -27,12 +27,12 @@ namespace DAL_CQS_.QueryHandlers
 
             if (user != null)
             {
-                _logger.LogInformation($"User {user.Email} found");
+                //_logger.LogInformation($"User {user.Email} found");
                 return user;
             }
             else
             {
-                _logger.LogWarning($"User {request.Email} not found!");
+                //_logger.LogWarning($"User {request.Email} not found!");
                 return null;
             }
         }

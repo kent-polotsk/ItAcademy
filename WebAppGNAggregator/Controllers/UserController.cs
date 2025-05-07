@@ -1,4 +1,5 @@
-﻿using DAL_CQS_.Queries;
+﻿using DAL_CQS_.Commands;
+using DAL_CQS_.Queries;
 using DataConvert.DTO;
 using EFDatabase.Entities;
 using Mappers.Mappers;
@@ -50,20 +51,72 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpPost]
-        public IActionResult Profile(UserDto userDto = null)
+        public async Task<IActionResult> Profile(UserDto userDto = null)
         {
-            //var isSaved = _userService.SaveUser(userDto);
-            if (ModelState.IsValid)
+            try
             {
-                //save
-                _logger.LogInformation("saved : " + userDto.PositivityRate);
-                TempData["Saved"]= "Данные сохранены";
-                return View(userDto);
+                if (ModelState.IsValid)
+                {
+                    bool isSaved = false;
+                    isSaved = await _mediator.Send(new UpdateUserByIdCommand() { userDto = userDto });
+                    if (isSaved)
+                    {
+                        _logger.LogInformation($"Profile of user {userDto.Email} sussessfully saved");
+                        TempData["Saved"] = "Данные сохранены";
+                        return View(userDto);
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"User {userDto.Email} not found");
+                        return RedirectToAction("Error", "Home", new { statusCode = 404, errorMessage = "Похоже такого пользователя нет :(<br>" });
+                        throw new Exception();
+                    }
+                }
+                else
+                {
+                    return View(userDto);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return View(userDto);
+                _logger.LogWarning($"User {userDto.Email} not found");
+                return RedirectToAction("Error", "Home", new { statusCode = 404, errorMessage = "Похоже такого пользователя нет :(<br>" });
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(Guid? id)
+        {
+            try
+            {
+                bool isDeleted = false;
+                if (id != null)
+                {
+                    isDeleted = await _mediator.Send(new DeleteUserByIdCommand() { Id = (Guid)id });
+                }
+
+                if (isDeleted == true)
+                {
+                    _logger.LogInformation($"User Id:{id} deleted successfully (UserController)");
+                    return RedirectToAction("LogOut", "Account");
+                }
+                else
+                {
+                    _logger.LogWarning($"User Id:{id} not found");
+                    return RedirectToAction("Error", "Home", new { statusCode = 404, errorMessage = "Не удается найти пользователя для удаления :(<br>" });
+                    throw new Exception();
+                }
+            }
+            catch (Exception ex)
+            {
+                HttpContext.Response.StatusCode = 404;
+                return RedirectToAction("Error", "Home", new
+                {
+                    statusCode = 404,
+                    errorMessage = "Данные по пользователю не найдены :(<br>"
+                });
+            }
+        }
+
     }
 }

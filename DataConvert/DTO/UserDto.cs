@@ -19,9 +19,9 @@ namespace DataConvert.DTO
         public double PositivityRate { get; set; } = 0;
 
         public DateTime CreatedDate { get; set; }
-        //public DateTime? BanDate { get; set; } //ban to
+        public DateTime? BanToDate { get; set; } //ban to
         //public bool? IsAdmin { get; set; }
-        //public bool? IsBanned { get; set; }
+        public bool IsBanned { get; set; }
 
         public Guid RoleId { get; set; }
         //public Role Role { get; set; }

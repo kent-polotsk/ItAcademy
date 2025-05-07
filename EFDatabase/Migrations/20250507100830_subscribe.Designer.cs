@@ -4,6 +4,7 @@ using EFDatabase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EFDatabase.Migrations
 {
     [DbContext(typeof(GNAggregatorContext))]
-    partial class GNAggregatorContextModelSnapshot : ModelSnapshot
+    [Migration("20250507100830_subscribe")]
+    partial class subscribe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -140,7 +143,7 @@ namespace EFDatabase.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("BanToDate")
+                    b.Property<DateTime?>("BanDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedDate")
@@ -153,7 +156,7 @@ namespace EFDatabase.Migrations
                     b.Property<bool?>("IsAdmin")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsBanned")
+                    b.Property<bool?>("IsBanned")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsSubscribed")
