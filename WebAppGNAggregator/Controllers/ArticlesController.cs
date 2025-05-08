@@ -7,6 +7,7 @@ using DataConvert.DTO;
 using Serilog;
 using Mappers.Mappers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace WebAppGNAggregator.Controllers
@@ -20,19 +21,26 @@ namespace WebAppGNAggregator.Controllers
         private readonly IArticleService _articleService;
         private readonly ISourceService _sourceService;
         private readonly IRssService _rssService;
+        private readonly GNAggregatorContext _dbContext;
 
         //private const int _sourceId = 1;
 
         private readonly ArticleMapper _articleMapper;
 
 
-        public ArticlesController(ILogger<HomeController> logger, IArticleService articleService, ISourceService sourceService, IRssService rssService, ArticleMapper articleMapper)
+        public ArticlesController(ILogger<HomeController> logger,
+            IArticleService articleService, 
+            ISourceService sourceService,
+            IRssService rssService, 
+            ArticleMapper articleMapper, 
+            GNAggregatorContext dbContext)
         {
             _logger = logger;
             _articleService = articleService;
             _articleMapper = articleMapper;
             _sourceService = sourceService;
             _rssService = rssService;
+            _dbContext = dbContext;
         }
 
 
@@ -67,6 +75,9 @@ namespace WebAppGNAggregator.Controllers
                 var newArticlesData = articles.Where(a => !existedArticlesUrls.Contains(a.Url)).ToArray();
                 newArticles.AddRange(newArticlesData);
             }
+
+            
+
             await _articleService.AddArticlesAsync(newArticles, cancellationToken);
 
             await _articleService.UpdateTextForArticlesByWebScrappingAsync(cancellationToken);
@@ -74,6 +85,20 @@ namespace WebAppGNAggregator.Controllers
 
             _logger.LogInformation("Articles aggregated successfully");
             return RedirectToAction("Index", "Home");
+        }
+
+
+        [HttpPost]
+        public async Task Rate(CancellationToken cancellationToken = default) 
+        {
+            var articles = await _dbContext.Articles.Take(10).ToListAsync(cancellationToken);
+
+            foreach (var a in articles)
+            {
+                if (a.Content!=null)
+                a.PositivityRate = _articleService.PositivityRating(a.Content);
+            }
+            await _dbContext.SaveChangesAsync();
         }
 
 

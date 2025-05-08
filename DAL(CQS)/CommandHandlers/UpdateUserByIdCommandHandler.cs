@@ -28,7 +28,7 @@ namespace DAL_CQS_.CommandHandlers
             if (user != null)
             {
                 user.IsBanned = request.userDto.IsBanned;
-                user.IsSubscribed = request.userDto.IsBanned;
+                user.IsSubscribed = request.userDto.IsSubscribed;
                 user.Name = request.userDto.Name;
                 user.BanToDate = request.userDto.BanToDate;
                 user.PositivityRate = request.userDto.PositivityRate;

@@ -14,10 +14,10 @@ namespace GNA.Services.Abstractions
         public Task<string[]> GetUniqueArticlesUrls(CancellationToken cancellationToken = default);
 
         public Task AddArticlesAsync(IEnumerable<Article> newUniqueArticles, CancellationToken cancellationToken = default);
-
        // public Task UpdateContentByWebScrappingAsync(Guid[] ids, CancellationToken token = default);
         public Task UpdateTextForArticlesByWebScrappingAsync(CancellationToken cancellationToken);
         
         public Task SaveChangedArticleAsync(ArticleDto articleDto, CancellationToken token=default);
+        double? PositivityRating(string inputText, CancellationToken token = default);
     }
 }

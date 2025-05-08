@@ -22,6 +22,7 @@ namespace DataConvert.DTO
         public DateTime? BanToDate { get; set; } //ban to
         //public bool? IsAdmin { get; set; }
         public bool IsBanned { get; set; }
+        public bool IsSubscribed { get; set; }
 
         public Guid RoleId { get; set; }
         //public Role Role { get; set; }

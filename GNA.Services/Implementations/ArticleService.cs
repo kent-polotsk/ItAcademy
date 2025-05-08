@@ -1,7 +1,6 @@
 ﻿using DAL_CQS_.Commands;
 using DAL_CQS_.Queries;
 using DataConvert.DTO;
-using EFDatabase;
 using EFDatabase.Entities;
 using GNA.Services.Abstractions;
 using HtmlAgilityPack;
@@ -9,7 +8,10 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 using Mappers.Mappers;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace GNA.Services.Implementations
 {
@@ -19,11 +21,16 @@ namespace GNA.Services.Implementations
         private readonly IMediator _mediator;
         private readonly ArticleMapper _articleMapper;
 
+        private readonly InferenceSession _tokenizerSession;
+        private readonly InferenceSession _modelSession;
+
         public ArticleService(ILogger<AccountService> logger, IMediator mediator, ArticleMapper articleMapper)
         {
             _logger = logger;
             _mediator = mediator;
             _articleMapper = articleMapper;
+           // _tokenizerSession = new InferenceSession(@"d:\C#\GNAggregator\GNAggregator\rubert_tokenizer.onnx");
+            _modelSession = new InferenceSession(@"d:\C#\GNAggregator\GNAggregator\rubert_base_cased.onnx");
         }
 
 
@@ -78,11 +85,61 @@ namespace GNA.Services.Implementations
             await _mediator.Send(new AddArticlesCommand() { Articles = newUniqueArticles }, cancellationToken);
         }
 
+        [HttpPost]
+        public double? PositivityRating(string inputText, CancellationToken cancellationToken = default)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = @"C:\Users\KeNT\miniconda3\python.exe",
+                Arguments = $"\"D:\\C#\\GNAggregator\\GNaggregator\\tokenizer_script.py\" \"{inputText}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            Console.WriteLine("start python...");
 
-        //public async Task UpdateContentByWebScrappingAsync(Guid[] ids, CancellationToken cancellationToken = default)
-        //{
+            using Process process = Process.Start(psi);
+            using StreamReader reader = process.StandardOutput;
+            using StreamReader errorReader = process.StandardError;
 
-        //}
+            string result = reader.ReadToEnd().Trim();
+            Console.WriteLine($"Python result: {result}");
+
+            string error = errorReader.ReadToEnd().Trim();
+            if (!string.IsNullOrEmpty(error))
+            {
+                Console.WriteLine($"Error Python: {error}");
+            }
+
+            process.WaitForExit(); 
+
+            if (string.IsNullOrEmpty(result))
+            {
+                Console.WriteLine("StandardOutput is empty!");
+                return null;
+            }
+
+            long[] tokenIds = result.Split(' ').Select(long.Parse).ToArray();
+            Console.WriteLine($"Size of tokenIds: {tokenIds.Length}");
+
+            const int maxLength = 512;
+            Array.Resize(ref tokenIds, maxLength);
+
+            var sentimentScore = RunModel(tokenIds);
+            _logger.LogInformation($"Rate after onnx model: sentimentScore {sentimentScore}");
+
+            return (double)sentimentScore;
+        }
+
+        private double RunModel(long[] tokens)
+        {
+
+            var inputs = new[] { NamedOnnxValue.CreateFromTensor("input.1", new DenseTensor<long>(tokens, new[] { 1, tokens.Length })) };
+            var results = _modelSession.Run(inputs);
+            Console.WriteLine($"model result: {results.First()}");
+            return results.First().AsEnumerable<float>().First();
+        }
 
 
         public async Task UpdateTextForArticlesByWebScrappingAsync(CancellationToken cancellationToken = default)
@@ -109,8 +166,6 @@ namespace GNA.Services.Implementations
                         _logger.LogWarning($"*ArticleService* Unable to load document from {article.Url} *ArticleService");
                         continue;
                     }
-
-
                     HtmlNode articleNode = null;
 
                     if (article.Url.Contains("onliner"))
@@ -126,7 +181,6 @@ namespace GNA.Services.Implementations
                         articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='article__text']");
                     }
 
-
                     if (articleNode == null)
                     {
                         _logger.LogWarning($"*ArticleService* Unable to load data from {article.Url}");
@@ -135,7 +189,6 @@ namespace GNA.Services.Implementations
                     string innerText = articleNode.InnerText;
                     string readyText = Regex.Replace(innerText, @"\s+", " ").Trim();
                     dictionary.Add(id, readyText);
-
                 }
                 await _mediator.Send(new UpdateTextForArticlesCommand()
                 {
@@ -153,6 +206,6 @@ namespace GNA.Services.Implementations
         {
             return _mediator.Send(new SaveChangedArticleAsyncCommand() { articleDto = atricleDto }, cancellationToken);
         }
-
+    
     }
 }
