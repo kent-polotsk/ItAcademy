@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mappers", "Mappers\Mappers.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataConvert", "DataConvert\DataConvert.csproj", "{E2CF9395-174E-41A4-8136-9CD7EF64969E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GNAggregator.WebApi", "GNAggregator.WebApi\GNAggregator.WebApi.csproj", "{8E04B598-7DDD-48B4-9498-C31A4CA24A8F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{E2CF9395-174E-41A4-8136-9CD7EF64969E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2CF9395-174E-41A4-8136-9CD7EF64969E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2CF9395-174E-41A4-8136-9CD7EF64969E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E04B598-7DDD-48B4-9498-C31A4CA24A8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E04B598-7DDD-48B4-9498-C31A4CA24A8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E04B598-7DDD-48B4-9498-C31A4CA24A8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E04B598-7DDD-48B4-9498-C31A4CA24A8F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

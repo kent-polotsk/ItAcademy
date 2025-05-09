@@ -89,16 +89,23 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpPost]
-        public async Task Rate(CancellationToken cancellationToken = default) 
+        public async Task<IActionResult> Rate(CancellationToken cancellationToken = default) 
         {
-            var articles = await _dbContext.Articles.Take(10).ToListAsync(cancellationToken);
+            var articles = await _dbContext.Articles.Take(150).ToListAsync(cancellationToken);
 
             foreach (var a in articles)
             {
-                if (a.Content!=null)
-                a.PositivityRate = _articleService.PositivityRating(a.Content);
+                if (a.Content != null)
+                {
+                    double? rate = _articleService.PositivityRating(a.Content, cancellationToken);
+                    if (rate != null)
+                    {
+                        a.PositivityRate = (double?)(Math.Round((decimal)rate, 2) * 10 - 5); 
+                    }
+                }
             }
             await _dbContext.SaveChangesAsync();
+            return RedirectToAction("Index","Home");
         }
 
 

@@ -1,0 +1,6 @@
+@GNAggregator.WebApi_HostAddress = http://localhost:5083
+
+GET {{GNAggregator.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
