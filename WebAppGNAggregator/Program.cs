@@ -50,6 +50,7 @@ namespace WebAppGNAggregator
             builder.Services.AddMediatR(sc => sc.RegisterServicesFromAssembly(typeof(AddArticlesCommand).Assembly));
             builder.Services.AddTransient<ArticleMapper>();
             builder.Services.AddTransient<UserMapper>();
+            builder.Services.AddTransient<SourceMapper>();
 
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

@@ -12,6 +12,8 @@ using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace GNA.Services.Implementations
 {
@@ -57,8 +59,44 @@ namespace GNA.Services.Implementations
             }
         }
 
+        [HttpGet]
+        public async Task<Article?[]> GetArticlesWithoutRate()
+        {
+            return await _mediator.Send(new GetArticlesWithoutRateQuery());
+        }
+
+        [HttpPost]
+        public async Task<bool> RatingProcess(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var articles = await GetArticlesWithoutRate();
+
+                foreach (var a in articles)
+                {
+                    if (a.Content != null)
+                    {
+                        double? rate = PositivityRating(a.Content, cancellationToken);
+                        if (rate != null)
+                        {
+                            a.PositivityRate = (double?)(Math.Round((decimal)rate, 2) * 10);
+                        }
+                        _logger.LogInformation($"{a.Id} rated: {a.PositivityRate}");
+                    }
+                }
+                await _mediator.Send(new SaveRatedArticlesCommand() { Articles = articles });
+                //return RedirectToAction("Index", "Home");
+                return true;
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError($"Error rating articles: {ex.Message}");
+                return false;
+            }
+        }
 
 
+        [HttpGet]
         public async Task<ArticleDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var article = await _mediator.Send(new GetArticleByIdQuery() { Id = id }, cancellationToken);
@@ -79,7 +117,7 @@ namespace GNA.Services.Implementations
         }
 
 
-
+        [HttpPost]
         public async Task AddArticlesAsync(IEnumerable<Article> newUniqueArticles, CancellationToken cancellationToken)
         {
             await _mediator.Send(new AddArticlesCommand() { Articles = newUniqueArticles }, cancellationToken);
@@ -88,56 +126,61 @@ namespace GNA.Services.Implementations
         [HttpPost]
         public double? PositivityRating(string inputText, CancellationToken cancellationToken = default)
         {
-            //var text = "Рано утром, когда мир ещё не успел полностью проснуться, Семён, начинающий программист, решил наконец-то разобраться со своим кодом, который \"волшебным образом\" выдавал ошибку раз в три часа. Он налил себе кофе, устроился поудобнее и начал изучать загадочный баг.\r\nСпустя несколько часов, с явными признаками отчаяния, он написал: — Ну ладно, давай попробуем что-то совсем абсурдное…\r\nА затем запустил программу. Ошибка исчезла.\r\nОшарашенный Семён вцепился в кружку с кофе. Система реально перестала выдавать ошибку, как будто поняла просьбу. Он нервно посмотрел на экран, затем снова на кружку, вспомнив, что не спал третий день подряд.\r\nНе веря в происходящее, он решил протестировать теорию. В следующем цикле он добавил строчку:\r\nИ снова ошибки не было!\r\nЧерез пару дней коллеги нашли Семёна в уголке офиса, бормочущего что-то о \"одухотворённом коде\" и \"психологической поддержке багов\". Один из них осторожно спросил: — У тебя всё нормально?..\r\nСемён только медленно кивнул, при этом пристально следя за экраном.\r\nВывод этой истории? Иногда даже баги хотят уважения.\r\n";
-            //var text2 = "Учёные завершили разработку революционной технологии очистки воздуха, которая способна существенно снизить уровень загрязнения в крупных городах. Первые испытания показали, что инновационная система устраняет до 95% вредных выбросов, улучшая экологическую ситуацию и снижая количество респираторных заболеваний. Ожидается, что уже в следующем году установка этих очистительных устройств станет стандартом для мегаполисов по всему миру.";
-            //var text22 = "Человечество достигло бессмертия! Теперь каждый сможет жить вечно и быть счастливым!";
-            
-            //var text3 = "В маленьком провинциальном городке жил пожилой мужчина, который каждое утро приходил в один и тот же парк. Он садился на старую лавочку и смотрел на детскую площадку, где когда-то играл его сын.\r\nПроходящие мимо люди иногда замечали его, но никто не знал его истории. Сын ушёл из жизни несколько лет назад, а теперь его отец приходил сюда, чтобы вспоминать их счастливые дни.\r\nКаждую весну он приносил сюда книгу, которую когда-то читал вслух сыну. Он бережно перелистывал страницы, словно всё ещё слышал его голос.\r\nОднажды к нему подошёл мальчик и спросил: — Дедушка, а почему ты всегда здесь сидишь?\r\nМужчина улыбнулся, но в его глазах был оттенок глубокой печали. — Здесь когда-то был мой самый счастливый момент, — ответил он.\r\nПрошло ещё несколько лет, и мужчина перестал приходить в парк. А на его любимой лавочке кто-то оставил книгу — такую же, как та, что он приносил.\r\nСтарый парк продолжал жить, дети всё так же смеялись на площадке. Но теперь, в тихие моменты заката, иногда можно было заметить одинокую фигуру, будто тень прошлого, всё ещё сидящую там…\r\n";
-            //var text4 = "Международные эксперты предупреждают о резком увеличении дефицита пресной воды, который может затронуть более половины мирового населения в ближайшие десятилетия. В некоторых регионах уже фиксируется критически низкий уровень водных ресурсов, что приводит к массовым переселениям и угрозе гуманитарных кризисов. Учёные призывают к немедленным мерам по сокращению потребления воды и разработке новых технологий её опреснения.";
-            //var text44 = "Глобальная катастрофа уничтожила 90% населения Земли, всё живое находится под угрозой полного исчезновения!";
-            
-            ProcessStartInfo psi = new ProcessStartInfo
+            try
             {
-                FileName = @"C:\Users\KeNT\miniconda3\python.exe",
-                Arguments = $"\"D:\\C#\\GNAggregator\\GNaggregator\\tokenizer_script.py\" \"{inputText}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            Console.WriteLine("start python...");
+                string tempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".txt");
+                File.WriteAllText(tempFile, inputText);
 
-            using Process process = Process.Start(psi);
-            using StreamReader reader = process.StandardOutput;
-            using StreamReader errorReader = process.StandardError;
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = @"C:\Users\KeNT\miniconda3\python.exe",
+                    Arguments = $"\"D:\\C#\\GNAggregator\\GNaggregator\\tokenizer_script.py\" \"{tempFile}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                
+                //Console.WriteLine($"Длина аргументов: {psi.Arguments.Length}");
+                Console.WriteLine("Start python...");
 
-            string result = reader.ReadToEnd().Trim();
-            Console.WriteLine($"Python result: {result}");
+                using Process process = Process.Start(psi);
+                using StreamReader reader = process.StandardOutput;
+                using StreamReader errorReader = process.StandardError;
 
-            string error = errorReader.ReadToEnd().Trim();
-            if (!string.IsNullOrEmpty(error))
-            {
-                Console.WriteLine($"Error Python: {error}");
+                string result = reader.ReadToEnd().Trim();
+                //Console.WriteLine($"Python result: {result}");
+
+                //string error = errorReader.ReadToEnd().Trim();
+                //if (!string.IsNullOrEmpty(error))
+                //{
+                //    Console.WriteLine($"Error Python: {error}");
+                //}
+
+                process.WaitForExit();
+
+                if (string.IsNullOrEmpty(result))
+                {
+                    Console.WriteLine("StandardOutput is empty!");
+                    return null;
+                }
+
+                long[] tokenIds = result.Split(' ').Select(long.Parse).ToArray();
+                //Console.WriteLine($"Size of tokenIds: {tokenIds.Length}");
+
+                const int maxLength = 512;
+                Array.Resize(ref tokenIds, maxLength);
+
+                var sentimentScore = RunModel(tokenIds);
+                //_logger.LogInformation($"Rate after onnx model: sentimentScore {sentimentScore}");
+
+                return (double)sentimentScore;
             }
-
-            process.WaitForExit(); 
-
-            if (string.IsNullOrEmpty(result))
+            catch (Exception ex)
             {
-                Console.WriteLine("StandardOutput is empty!");
-                return null;
+                Console.WriteLine(ex.Message);
+                return (double)0;
             }
-
-            long[] tokenIds = result.Split(' ').Select(long.Parse).ToArray();
-            Console.WriteLine($"Size of tokenIds: {tokenIds.Length}");
-
-            const int maxLength = 512;
-            Array.Resize(ref tokenIds, maxLength);
-
-            var sentimentScore = RunModel(tokenIds);
-            _logger.LogInformation($"Rate after onnx model: sentimentScore {sentimentScore}");
-
-            return (double)sentimentScore;
         }
 
         private double RunModel(long[] tokens)
@@ -145,9 +188,10 @@ namespace GNA.Services.Implementations
 
             var inputs = new[] { NamedOnnxValue.CreateFromTensor("input.1", new DenseTensor<long>(tokens, new[] { 1, tokens.Length })) };
             var results = _modelSession.Run(inputs);
-            Console.WriteLine($"model result: {results.First()}");
+            //Console.WriteLine($"model result: {results.First()}");
             return results.First().AsEnumerable<float>().First();
         }
+
 
 
         public async Task UpdateTextForArticlesByWebScrappingAsync(CancellationToken cancellationToken = default)
@@ -164,46 +208,60 @@ namespace GNA.Services.Implementations
                     _logger.LogWarning($"*ArticleService* Article {id} not found or URL doesn't exist");
                     continue;
                 }
+
+                var web = new HtmlWeb();
+                var doc = await web.LoadFromWebAsync(article.Url, cancellationToken);
+
+                if (doc == null)
+                {
+                    _logger.LogWarning($"*ArticleService* Unable to load document from {article.Url}");
+                    continue;
+                }
+
+                HtmlNode articleNode = null;
+
+                if (article.Url.Contains("onliner"))
+                {
+                    articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='news-text']");
+                }
+                else if (article.Url.Contains("belta"))
+                {
+                    articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='js-mediator-article']");
+                }
                 else
                 {
-                    var web = new HtmlWeb();
-                    var doc = await web.LoadFromWebAsync(article.Url, cancellationToken);
-
-                    if (doc == null)
-                    {
-                        _logger.LogWarning($"*ArticleService* Unable to load document from {article.Url} *ArticleService");
-                        continue;
-                    }
-                    HtmlNode articleNode = null;
-
-                    if (article.Url.Contains("onliner"))
-                    {
-                        articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='news-text']");
-                    }
-                    else if (article.Url.Contains("belta"))
-                    {
-                        articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='js-mediator-article']");
-                    }
-                    else
-                    {
-                        articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='article__text']");
-                    }
-
-                    if (articleNode == null)
-                    {
-                        _logger.LogWarning($"*ArticleService* Unable to load data from {article.Url}");
-                        continue;
-                    }
-                    string innerText = articleNode.InnerText;
-                    string readyText = Regex.Replace(innerText, @"\s+", " ").Trim();
-                    dictionary.Add(id, readyText);
+                    articleNode = doc.DocumentNode.SelectSingleNode("//div[@class='article__text']");
                 }
-                await _mediator.Send(new UpdateTextForArticlesCommand()
+
+                if (articleNode == null)
                 {
-                    Data = dictionary
-                }, cancellationToken);
+                    _logger.LogWarning($"*ArticleService* Unable to load data from {article.Url}");
+                    continue;
+                }
+
+                string cleanedText = CleanHtmlText(articleNode);
+                dictionary.Add(id, cleanedText);
             }
+
+            await _mediator.Send(new UpdateTextForArticlesCommand()
+            {
+                Data = dictionary
+            }, cancellationToken);
         }
+
+
+        private string CleanHtmlText(HtmlNode node)
+        {
+            foreach (var script in node.SelectNodes("//script|//style") ?? Enumerable.Empty<HtmlNode>())
+            {
+                script.Remove();
+            }
+
+            string text = node.InnerText;
+
+            return Regex.Replace(text, @"\s+", " ").Trim();
+        }
+
 
         public async Task<bool> DeleteAsync(Guid Id, CancellationToken cancellationToken = default)
         {

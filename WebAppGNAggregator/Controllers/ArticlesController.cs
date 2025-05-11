@@ -63,7 +63,7 @@ namespace WebAppGNAggregator.Controllers
         {
             var sources = await _sourceService.GetSourceWithRssAsync(cancellationToken);
             var newArticles = new List<Article>();
-
+            
             foreach (var source in sources)
             {
                 var existedArticlesUrls = await _articleService.GetUniqueArticlesUrls(cancellationToken);
@@ -76,12 +76,9 @@ namespace WebAppGNAggregator.Controllers
                 newArticles.AddRange(newArticlesData);
             }
 
-            
-
             await _articleService.AddArticlesAsync(newArticles, cancellationToken);
 
             await _articleService.UpdateTextForArticlesByWebScrappingAsync(cancellationToken);
-
 
             _logger.LogInformation("Articles aggregated successfully");
             return RedirectToAction("Index", "Home");
@@ -91,21 +88,32 @@ namespace WebAppGNAggregator.Controllers
         [HttpPost]
         public async Task<IActionResult> Rate(CancellationToken cancellationToken = default) 
         {
-            var articles = await _dbContext.Articles.Take(150).ToListAsync(cancellationToken);
+            //var articles = await _articleService.GetArticlesWithoutRate();//_dbContext.Articles.Take(15).ToListAsync(cancellationToken);
 
-            foreach (var a in articles)
+            //foreach (var a in articles)
+            //{
+            //    if (a.Content != null)
+            //    {
+            //        double? rate = _articleService.PositivityRating(a.Content, cancellationToken);
+            //        if (rate != null)
+            //        {
+            //            a.PositivityRate = (double?)(Math.Round((decimal)rate, 2) * 10 ); 
+            //        }
+            //    }
+            //}
+            //await _dbContext.SaveChangesAsync();
+            var isRated = await _articleService.RatingProcess(cancellationToken);
+            if (isRated)
             {
-                if (a.Content != null)
-                {
-                    double? rate = _articleService.PositivityRating(a.Content, cancellationToken);
-                    if (rate != null)
-                    {
-                        a.PositivityRate = (double?)(Math.Round((decimal)rate, 2) * 10 - 5); 
-                    }
-                }
+                _logger.LogInformation("Articles has been rated");
+                return RedirectToAction("Index", "Home");
             }
-            await _dbContext.SaveChangesAsync();
-            return RedirectToAction("Index","Home");
+            else
+            {
+                _logger.LogError("Error during rating articles");
+                return RedirectToAction("Error","Home",new {statusCode = 500, errorMessage = "Оценка новостей пошла не по плану :(" });
+            }
+            
         }
 
 

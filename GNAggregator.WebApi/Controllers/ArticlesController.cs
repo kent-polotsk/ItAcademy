@@ -1,6 +1,11 @@
-﻿using GNAggregator.WebApi.Models;
+﻿
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
+
+using GNA.Services.Abstractions;
+using System.Threading;
+using DataConvert.DTO;
 
 namespace GNAggregator.WebApi.Controllers
 {
@@ -8,53 +13,91 @@ namespace GNAggregator.WebApi.Controllers
     [ApiController]
     public class ArticlesController : ControllerBase
     {
+        private readonly IArticleService _articleService;
+        private readonly ILogger<ArticlesController> _logger;
 
-        private static List<ArticleModel> Articles = new List<ArticleModel>()
+        public ArticlesController(IArticleService articleService, ILogger<ArticlesController> logger)
         {
-            new ArticleModel
-            {
-                Id = Guid.NewGuid(),
-                Title = "Title1",
-                Description = "D1",
-                Content = "1234566",
-                Created = DateTime.UtcNow,
-                Url = "http",
-                ImageUrl = "",
-
-                PositivityRate = 1,
-
-                SourceId  = 1,
-                SourceName ="s1"
-            },
-            new ArticleModel
-            {
-                Id = Guid.NewGuid(),
-                Title = "Title2",
-                Description = "D2",
-                Content = "2221234566",
-                Created = DateTime.UtcNow,
-                Url = "http2",
-                ImageUrl = "",
-
-                PositivityRate = 2,
-
-                SourceId  = 2,
-                SourceName ="s2"
-            }
-        };
-
-        [HttpGet]
-        public IActionResult Get() 
-        {
-            return Ok(Articles);
+            _articleService = articleService;
+            _logger = logger;
         }
 
-        [HttpPost]
-        public IActionResult AddArticle(ArticleModel articleModel)
+        /// <summary>
+        /// Get articles accordind min rate with pagination
+        /// </summary>
+        /// <param name="minRate"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Array of articles</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAllArticles(double? minRate, int pageNumber = 1, int pageSize = 15, CancellationToken cancellationToken = default)
         {
-            Articles.Add(articleModel);
-            return Ok(Articles);
-         
+            var articles = await _articleService.GetAllPositiveAsync(minRate, pageNumber, pageSize, cancellationToken);
+            _logger.LogInformation($"Articles (minRate={minRate}, pNumber={pageNumber}, p.Size={pageSize}) successfully loaded");
+            return Ok(articles);
+        }
+
+        /// <summary>
+        /// Get article
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>One article by Id</returns>
+        [HttpGet("id")]
+        [ProducesResponseType<ArticleDto>(statusCode:200)]
+        [ProducesResponseType<NotFoundResult>(statusCode:404)]
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var article = await _articleService.GetByIdAsync(id, cancellationToken);
+                if (article == null)
+                {
+                    _logger.LogWarning($"Article {id} not found");
+                    return NotFound();
+                }
+                _logger.LogInformation($"Article {id} successfully found");
+                return Ok(article);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while getting article by id");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
+        [HttpPatch("id")]
+        public async Task<IActionResult> Update(ArticleDto articleDto, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await _articleService.SaveChangedArticleAsync(articleDto, cancellationToken);
+                _logger.LogInformation($"Article {articleDto.Id} successfully updated");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while saving article");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpDelete("id")]
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await _articleService.DeleteAsync(id, cancellationToken);
+                _logger.LogInformation($"Article {id} successfully deleted");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error during delete article by id");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }

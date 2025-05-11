@@ -19,5 +19,8 @@ namespace GNA.Services.Abstractions
         
         public Task SaveChangedArticleAsync(ArticleDto articleDto, CancellationToken token=default);
         double? PositivityRating(string inputText, CancellationToken token = default);
+        
+        public Task<Article?[]> GetArticlesWithoutRate();
+        public Task<bool> RatingProcess(CancellationToken cancellationToken = default);
     }
 }

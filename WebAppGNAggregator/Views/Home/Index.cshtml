@@ -1,4 +1,5 @@
-﻿@model ArticleModelsCollection
+﻿@using System.Security.Claims
+@model ArticleModelsCollection
 
 @{
     ViewBag.Title = "Агрегатор хороших новостей";
@@ -19,8 +20,11 @@
 </div>
 
 <div>
-    <a class="btn  btn400" asp-action="Aggregate" asp-controller="Articles">Aggregate</a>
-    <a class="btn  btn400" asp-action="Index" asp-controller="Sources">Sources</a>
+    @if (User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin"))
+    {
+        <a class="btn  btn400" asp-action="Aggregate" asp-controller="Articles">Сбор/оценка</a>
+        <a class="btn  btn400" asp-action="Index" asp-controller="Sources">Список источников</a>
+    }
 </div>
 
 
