@@ -24,8 +24,8 @@ namespace DAL_CQS_.QueryHandlers
             var articles = await _dbContext.Articles
                 //.AsNoTracking()
                 .Include(a => a.Source)
-                .Where(a => a.PositivityRate == null)
-                .Take(50)
+                .Where(a => a.PositivityRate == null&&a.Content!=null)
+                .Take(20)
                 //.Select(a => _articleMapper.ArticleToArticleDto(a))
                 .ToArrayAsync(cancellationToken);
 

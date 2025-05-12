@@ -88,32 +88,33 @@ namespace WebAppGNAggregator.Controllers
         [HttpPost]
         public async Task<IActionResult> Rate(CancellationToken cancellationToken = default) 
         {
-            //var articles = await _articleService.GetArticlesWithoutRate();//_dbContext.Articles.Take(15).ToListAsync(cancellationToken);
+            await Task.Run(async () =>
+            {
+                var isRated = await _articleService.RatingProcess(cancellationToken);
+                if (isRated)
+                {
+                    _logger.LogInformation("Articles has been rated");
+                }
+                else
+                {
+                    _logger.LogError("Error during rating articles");
+                }
+            }, cancellationToken);
 
-            //foreach (var a in articles)
+            return RedirectToAction("Index", "Home");
+
+            //var isRated = await _articleService.RatingProcess(cancellationToken);
+            //if (isRated)
             //{
-            //    if (a.Content != null)
-            //    {
-            //        double? rate = _articleService.PositivityRating(a.Content, cancellationToken);
-            //        if (rate != null)
-            //        {
-            //            a.PositivityRate = (double?)(Math.Round((decimal)rate, 2) * 10 ); 
-            //        }
-            //    }
+            //    _logger.LogInformation("Articles has been rated");
+            //    return RedirectToAction("Index", "Home");
             //}
-            //await _dbContext.SaveChangesAsync();
-            var isRated = await _articleService.RatingProcess(cancellationToken);
-            if (isRated)
-            {
-                _logger.LogInformation("Articles has been rated");
-                return RedirectToAction("Index", "Home");
-            }
-            else
-            {
-                _logger.LogError("Error during rating articles");
-                return RedirectToAction("Error","Home",new {statusCode = 500, errorMessage = "Оценка новостей пошла не по плану :(" });
-            }
-            
+            //else
+            //{
+            //    _logger.LogError("Error during rating articles");
+            //    return RedirectToAction("Error","Home",new {statusCode = 500, errorMessage = "Оценка новостей пошла не по плану :(" });
+            //}
+
         }
 
 

@@ -25,7 +25,7 @@ namespace DAL_CQS_.QueryHandlers
             return await _dbContext.Articles
                 .AsNoTracking()
                 .Select(a=>a.Url)
-                .Where(a => string.IsNullOrEmpty(a)||string.IsNullOrWhiteSpace(a))
+                .Where(a => !string.IsNullOrEmpty(a)||!string.IsNullOrWhiteSpace(a))
                 .Distinct()
                 .ToArrayAsync(cancellationToken);
         }
