@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebAppGNAggregator.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class ArticlesController : Controller
     {
 
@@ -55,6 +55,7 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Aggregate()
         {
             _logger.LogInformation("View 'Aggregate' loaded");
@@ -62,6 +63,7 @@ namespace WebAppGNAggregator.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AggregateProcessing(CancellationToken cancellationToken = default)
         {
             var sources = await _sourceService.GetSourceWithRssAsync(cancellationToken);
@@ -89,15 +91,20 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Rate(CancellationToken cancellationToken = default) 
         {
+
             _ = Task.Run(async () =>
             {
+
                 using var scope = _scopeFactory.CreateScope(); 
                 var articleService = scope.ServiceProvider.GetRequiredService<IArticleService>();
-
-                var isRated = await articleService.RatingProcess(cancellationToken);
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<ArticlesController>>();
+
+                logger.LogInformation("Articles rating process was started..... ");
+                var isRated = await articleService.RatingProcess(cancellationToken);
+                
 
                 if (isRated)
                 {
@@ -147,6 +154,7 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(ArticleDto model)
         {
             try
@@ -178,6 +186,7 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditArticle(Guid id)
         {
             try
@@ -209,6 +218,7 @@ namespace WebAppGNAggregator.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditArticle(ArticleModel model)
         {
             try

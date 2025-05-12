@@ -24,7 +24,7 @@ namespace DAL_CQS_.QueryHandlers
         public async Task<Article[]> Handle(GetPositiveArticlesWithPaginationQuery request, CancellationToken cancellationToken)
         {
             var result = await _dbContext.Articles
-                    .Where(article => article.PositivityRate >= request.PositivityRate) // article.PositivityRate == null ||
+                    .Where(article => article.PositivityRate >= request.PositivityRate&& article.PositivityRate<=5) // article.PositivityRate == null ||
                     .Include(article => article.Source)
                     .AsNoTracking()
                     .OrderByDescending(article => article.Created)

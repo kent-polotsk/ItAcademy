@@ -12,9 +12,11 @@
         public string? ImageUrl { get; set; }
 
         public double? PositivityRate { get; set; }
+        public bool IsSent { get; set; } = false;
 
         public int SourceId { get; set; }
         public Source Source { get; set; }
+        
 
         public List<Comment?> Comments { get; set; }
     }

@@ -22,8 +22,6 @@ namespace GNA.Services.Implementations
         private readonly ILogger<AccountService> _logger;
         private readonly IMediator _mediator;
         private readonly ArticleMapper _articleMapper;
-
-        private readonly InferenceSession _tokenizerSession;
         private readonly InferenceSession _modelSession;
 
         public ArticleService(ILogger<AccountService> logger, IMediator mediator, ArticleMapper articleMapper)
@@ -31,7 +29,6 @@ namespace GNA.Services.Implementations
             _logger = logger;
             _mediator = mediator;
             _articleMapper = articleMapper;
-           // _tokenizerSession = new InferenceSession(@"d:\C#\GNAggregator\GNAggregator\rubert_tokenizer.onnx");
             _modelSession = new InferenceSession(@"d:\C#\GNAggregator\GNAggregator\rubert_base_cased.onnx");
         }
 
@@ -81,11 +78,9 @@ namespace GNA.Services.Implementations
                         {
                             a.PositivityRate = (double?)(Math.Round((decimal)rate, 2) * 10);
                         }
-                        //_logger.LogInformation($"{a.Id} rated: {a.PositivityRate}");
                     }
                 }
                 await _mediator.Send(new SaveRatedArticlesCommand() { Articles = articles });
-                //return RedirectToAction("Index", "Home");
                 return true;
             }
             catch (Exception ex) 
@@ -141,21 +136,11 @@ namespace GNA.Services.Implementations
                     CreateNoWindow = true
                 };
                 
-                //Console.WriteLine($"Длина аргументов: {psi.Arguments.Length}");
-                Console.WriteLine("Start python...");
-
                 using Process process = Process.Start(psi);
                 using StreamReader reader = process.StandardOutput;
                 using StreamReader errorReader = process.StandardError;
 
                 string result = reader.ReadToEnd().Trim();
-                //Console.WriteLine($"Python result: {result}");
-
-                //string error = errorReader.ReadToEnd().Trim();
-                //if (!string.IsNullOrEmpty(error))
-                //{
-                //    Console.WriteLine($"Error Python: {error}");
-                //}
 
                 process.WaitForExit();
 

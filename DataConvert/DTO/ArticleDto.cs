@@ -19,7 +19,7 @@ namespace DataConvert.DTO
         public string? ImageUrl { get; set; }
 
         public double? PositivityRate { get; set; }
-
+        public bool IsSent { get; set; }
 
         //public int SourceId { get; set; }
         public string SourceName { get; set; }

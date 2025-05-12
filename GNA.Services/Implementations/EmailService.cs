@@ -36,6 +36,13 @@ namespace GNA.Services.Implementations
             await _smtpClient.SendMailAsync(mailMessage);
 
         }
+
+        public async Task SendNewsletterAsync(string toEmail, string message = "")
+        {
+            const string SUBJECT = "РАССЫЛКА ХОРОШИХ НОВОСТЕЙ";
+            var mailMessage = new MailMessage(_configuration["EmailSettings:Username"], toEmail, SUBJECT, message);
+            await _smtpClient.SendMailAsync(mailMessage);
+        }
     }
 }
 

@@ -1,20 +1,36 @@
 ﻿@{
-    ViewBag.Title = "Агрегация новостей";
+    ViewBag.Title = "Администрирование новостей";
     Layout = "_Layout";
 }
+<div class="cardGeneral shadow-lg">
+    <div class="card shadow-lg mb-4">
+        <h2>Администрирование новостей</h2>
+    </div>
 
-<h2>Aggregate</h2>
+    <div class="mb-4">
+        <form asp-action="AggregateProcessing" asp-controller="Articles" method="post">
+            <div class="alert alert-warning" role="alert">
+                Сбор новостей займет некоторое время...
+            </div>
+            <input class="btn btn400 " type="submit" value="Агрегировать" />
+        </form>
+    </div>
 
-<form asp-action="AggregateProcessing" asp-controller="Articles" method="post">
-   <div class="alert alert-warning" role="alert">
-       Сбор новостей займет некоторое время...
-   </div>
-    <input class="btn btn400" type="submit" value="Агрегировать" />
-</form>
+    <div class="mb-4">
+        <form asp-action="Rate" asp-controller="Articles" method="post">
+            <div class="alert alert-info" role="alert">
+                Оценка выполняется в фоновом режиме. Сайтом можно пользоваться!
+            </div>
+            <input class="btn btn400 " type="submit" value="Оценить" />
+        </form>
+    </div>
 
-<form asp-action="Rate" asp-controller="Articles" method="post">
-   <div class="alert alert-warning" role="alert">
-       Оценка происходит долго!
-   </div>
-    <input class="btn btn400 " type="submit" value="Оценить" />
-</form>
+    <div class="mb-4">
+        <form asp-action="SendNewsletters" asp-controller="Newsletter" method="post">
+            <div class="alert alert-info" role="alert">
+                Рассылка НЕ занимает много времени
+            </div>
+            <input class="btn btn400 " type="submit" value="Рассылка" />
+        </form>
+    </div>
+</div>

@@ -46,6 +46,7 @@ namespace WebAppGNAggregator
             builder.Services.AddScoped<ISourceService, SourceService>();
             builder.Services.AddScoped<IRssService, RssService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<INewsletterService, NewsletterService>();
 
             builder.Services.AddMediatR(sc => sc.RegisterServicesFromAssembly(typeof(AddArticlesCommand).Assembly));
             builder.Services.AddTransient<ArticleMapper>();

@@ -9,5 +9,6 @@ namespace GNA.Services.Abstractions
     public interface IEmailService
     {
         public Task SendEmailAsync(string toEmail, string code);
+        public Task SendNewsletterAsync(string toEmail, string message = "");
     }
 }

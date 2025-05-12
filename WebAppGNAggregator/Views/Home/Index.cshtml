@@ -22,7 +22,7 @@
 <div>
     @if (User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin"))
     {
-        <a class="btn  btn400" asp-action="Aggregate" asp-controller="Articles">Сбор/оценка</a>
+        <a class="btn  btn400" asp-action="Aggregate" asp-controller="Articles">Администрирование новостей</a>
         <a class="btn  btn400" asp-action="Index" asp-controller="Sources">Список источников</a>
     }
 </div>
