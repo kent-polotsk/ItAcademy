@@ -81,7 +81,7 @@ namespace GNA.Services.Implementations
                         {
                             a.PositivityRate = (double?)(Math.Round((decimal)rate, 2) * 10);
                         }
-                        _logger.LogInformation($"{a.Id} rated: {a.PositivityRate}");
+                        //_logger.LogInformation($"{a.Id} rated: {a.PositivityRate}");
                     }
                 }
                 await _mediator.Send(new SaveRatedArticlesCommand() { Articles = articles });

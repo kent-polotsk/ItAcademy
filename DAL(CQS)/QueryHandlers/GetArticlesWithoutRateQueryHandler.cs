@@ -25,7 +25,7 @@ namespace DAL_CQS_.QueryHandlers
                 //.AsNoTracking()
                 .Include(a => a.Source)
                 .Where(a => a.PositivityRate == null&&a.Content!=null)
-                .Take(20)
+                .Take(100)
                 //.Select(a => _articleMapper.ArticleToArticleDto(a))
                 .ToArrayAsync(cancellationToken);
 

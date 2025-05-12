@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using GNA.Services.Abstractions;
 using System.Threading;
 using DataConvert.DTO;
+using Serilog;
 
 namespace GNAggregator.WebApi.Controllers
 {

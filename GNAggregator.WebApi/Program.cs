@@ -4,11 +4,9 @@ using EFDatabase;
 using GNA.Services.Abstractions;
 using GNA.Services.Implementations;
 using Mappers.Mappers;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using OtpNet;
 using Serilog;
+using Serilog.Settings.Configuration;
 using System.Reflection;
 
 namespace GNAggregator.WebApi
@@ -22,9 +20,14 @@ namespace GNAggregator.WebApi
             // Add services to the container.
             builder.Services.AddControllers();
 
-
             builder.Services.AddSerilog();
-            builder.Host.UseSerilog(Log.Logger);
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .CreateLogger();
+
+            builder.Host.UseSerilog();
+
 
             builder.Services.AddDbContext<GNAggregatorContext>(opt =>
                     opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));

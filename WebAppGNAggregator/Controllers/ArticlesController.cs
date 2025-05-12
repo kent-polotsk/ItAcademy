@@ -21,7 +21,8 @@ namespace WebAppGNAggregator.Controllers
         private readonly IArticleService _articleService;
         private readonly ISourceService _sourceService;
         private readonly IRssService _rssService;
-        private readonly GNAggregatorContext _dbContext;
+        //private readonly GNAggregatorContext _dbContext;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         //private const int _sourceId = 1;
 
@@ -33,14 +34,16 @@ namespace WebAppGNAggregator.Controllers
             ISourceService sourceService,
             IRssService rssService, 
             ArticleMapper articleMapper, 
-            GNAggregatorContext dbContext)
+           // GNAggregatorContext dbContext,
+            IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _articleService = articleService;
             _articleMapper = articleMapper;
             _sourceService = sourceService;
             _rssService = rssService;
-            _dbContext = dbContext;
+            //_dbContext = dbContext;
+            _scopeFactory = scopeFactory;
         }
 
 
@@ -88,33 +91,25 @@ namespace WebAppGNAggregator.Controllers
         [HttpPost]
         public async Task<IActionResult> Rate(CancellationToken cancellationToken = default) 
         {
-            await Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
-                var isRated = await _articleService.RatingProcess(cancellationToken);
+                using var scope = _scopeFactory.CreateScope(); 
+                var articleService = scope.ServiceProvider.GetRequiredService<IArticleService>();
+
+                var isRated = await articleService.RatingProcess(cancellationToken);
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<ArticlesController>>();
+
                 if (isRated)
                 {
-                    _logger.LogInformation("Articles has been rated");
+                    logger.LogInformation("Articles have been rated");
                 }
                 else
                 {
-                    _logger.LogError("Error during rating articles");
+                    logger.LogError("Error during rating articles");
                 }
             }, cancellationToken);
 
             return RedirectToAction("Index", "Home");
-
-            //var isRated = await _articleService.RatingProcess(cancellationToken);
-            //if (isRated)
-            //{
-            //    _logger.LogInformation("Articles has been rated");
-            //    return RedirectToAction("Index", "Home");
-            //}
-            //else
-            //{
-            //    _logger.LogError("Error during rating articles");
-            //    return RedirectToAction("Error","Home",new {statusCode = 500, errorMessage = "Оценка новостей пошла не по плану :(" });
-            //}
-
         }
 
 
