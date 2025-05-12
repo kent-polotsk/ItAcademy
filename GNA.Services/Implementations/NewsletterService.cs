@@ -4,12 +4,6 @@ using GNA.Services.Abstractions;
 using Mappers.Mappers;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Microsoft.ML.OnnxRuntime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GNA.Services.Implementations
 {
@@ -32,7 +26,6 @@ namespace GNA.Services.Implementations
 
         public async Task SendEmailsAsync()
         {
-
             try
             {
                 const string Adress = "https://localhost:7080/Articles/Details/";
@@ -80,7 +73,6 @@ namespace GNA.Services.Implementations
             {
                 _logger.LogError("Error while sending newsletters: " + ex.Message);
             }
-
         }
     }
 }

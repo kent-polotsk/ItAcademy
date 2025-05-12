@@ -43,7 +43,7 @@ namespace WebAppGNAggregator.TagHelpers
             if (currentPage > 1)
             {
                 var firstPageTag = new TagBuilder("a");
-                firstPageTag.AddCssClass("btn btn-outline-primary");
+                firstPageTag.AddCssClass("btn btn-outline-primary");//
                 firstPageTag.Attributes["href"] = urlHelper.Action(PageAction, new { pageNumber = 1, pageSize = PageInfo.PageSize });
                 firstPageTag.InnerHtml.AppendHtml("<<");
                 result.InnerHtml.AppendHtml(firstPageTag);
@@ -70,7 +70,7 @@ namespace WebAppGNAggregator.TagHelpers
 
                 if (i == currentPage)
                 {
-                    pageTag.AddCssClass("active");
+                    pageTag.AddCssClass("btn400"); //active 
                 }
 
                 pageTag.Attributes["href"] = urlHelper.Action(PageAction, new { pageNumber = i, pageSize = PageInfo.PageSize });

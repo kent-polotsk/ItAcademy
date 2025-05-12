@@ -1,4 +1,5 @@
 ﻿@using DataConvert.DTO
+@using System.Security.Claims
 
 @model UserDto
 
@@ -18,23 +19,23 @@
         </div>
 
         <div style ="height:70px" class="pb-1">
-        @if (TempData.ContainsKey("Saved"))
-        {
-            <div class="alert alert-info text-info ">
-                @TempData["Saved"]
-            </div>
-        }
+            @if (TempData.ContainsKey("Saved"))
+            {
+                <div class="alert alert-info text-info ">
+                    @TempData["Saved"]
+                </div>
+            }
         </div>
 
         <form asp-action="Profile" asp-controller="User" method="post">
             <input type="hidden" name="Id" value="@Model.Id" />
-             <input type="hidden" name="RoleId" value="@Model.RoleId" />
+            <input type="hidden" name="RoleId" value="@Model.RoleId" />
 
             <input asp-for="@Model.Email" class="mb-4 pt-0 form-control  readonly-input" style="color:midnightblue; font-size:24px" readonly>
 
             <div class="mb-4 ">
                 <input asp-for="@Model.CreatedDate" type="hidden" class="mb-4 form-control readonly-input" readonly>Зарегистрирован: @Model.CreatedDate
-               </div>
+            </div>
 
             <div class="mb-4 ">
                 <label for="@Model.Name" class="form-label">Никнейм</label>
@@ -49,7 +50,7 @@
             <div class="mb-4">
                 <label for="PositivityRange" class="form-label">Рейтинг позитивности : </label>
                 <span id="PositivityRate">@Model.PositivityRate</span>   
-                
+
                 <input asp-for="@Model.PositivityRate" type="range" class="form-range" min="-5" max="5" step="0.1" id="PositivityRange" value="@Model.PositivityRate">
 
             </div>
@@ -62,8 +63,11 @@
         </form>
         <div class="d-flex justify-content-center">
             <form asp-controller="User" asp-action="DeleteUser" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить профиль?');">
-                <input type="hidden" name="Id" value="@Model.Id" /> 
-                <button type="submit" class="btn btn-danger btn-lg">Удалить профиль</button>
+                <input type="hidden" name="Id" value="@Model.Id" />
+                @if (User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value != "Admin"))
+                {
+                    <button type="submit" class="btn btn-danger btn-lg">Удалить профиль</button>
+                }
             </form>
 
         </div>
